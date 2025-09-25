@@ -1,0 +1,39 @@
+Build an expert-level, full-stack web application for a flagship AI hackathon. The application's purpose is to serve as an intelligent document analysis hub.
+
+**I. Technology Stack & Configuration:**
+- **Backend:** Python using the FastAPI framework.
+- **Frontend:** A React + Vite application using JavaScript (not TypeScript).
+- **Styling:** The project must be fully configured with Tailwind CSS and the Shadcn/ui library. Pre-install the following Shadcn components: `Card`, `Button`, `Input`, `ScrollArea`, `Avatar`, and a `Loader` icon from `lucide-react`.
+
+**II. UI/UX Design & Layout ("Killer UI"):**
+The UI must be a modern, responsive, three-panel dashboard with a dark theme (dark background, light text).
+- **Left Panel (Sidebar):** A slim, fixed sidebar (approx. 25% of the screen width).
+    - At the top, a **File Upload Zone** inside a Shadcn `Card`. This zone MUST be a fully functional drag-and-drop area. It should visually change when a file is dragged over it (e.g., border color changes). It must also contain a "Browse Files" `Button`.
+    - Below the upload zone, use a `ScrollArea` to list processed documents. Each item should display the filename and a green checkmark icon from `lucide-react` when processing is complete.
+- **Center Panel (Main Workspace):** The largest panel (approx. 50% width).
+    - It must default to a **Chat Interface**.
+    - The chat history should be within a `ScrollArea`.
+    - User messages should be aligned to the right, bot messages to the left. Use Shadcn `Avatar` components for icons.
+    - The message input area at the bottom should use a Shadcn `Input` and an icon-only `Button` for sending.
+    - When the AI is "thinking," a loading state must be displayed in the chat.
+- **Right Panel (Context Pane):** A fixed panel for contextual details (approx. 25% width).
+    - It should have a clear title like "Contextual Details".
+    - Initially, it should be empty with a placeholder message. This panel will later display source snippets and graph node information.
+
+**III. Backend API & Logic Placeholders:**
+- **`/process-documents` (POST):**
+    - Must accept multiple file uploads (`UploadFile`).
+    - Inside, add the placeholder: `# TODO: STEP 4 - KICK OFF CREWAI. Orchestrate agents to process content, then populate ChromaDB (vectors) and Neo4j (graph).`
+    - It should handle the file data and return a JSON response confirming success.
+- **`/ask` (POST):**
+    - Must accept a JSON object: `{"query": "string"}`.
+    - Inside, add the placeholder: `# TODO: STEP 5 - IMPLEMENT DUAL-BRAIN RAG. Query ChromaDB for semantic context, query Neo4j for relational context, then synthesize the final answer.`
+    - For now, it should just echo the query in the response.
+
+**IV. Frontend React Functionality:**
+- The application must be a single-page application.
+- Use React hooks (`useState`, `useEffect`) to manage all state (file lists, loading states, chat history, etc.).
+- The drag-and-drop functionality must be fully implemented.
+- File uploads must be sent to the `/process-documents` backend endpoint. The app must display a loading indicator while processing.
+- The chat input must be disabled by default and only enabled after the first document has been successfully processed.
+- User queries must be sent to the `/ask` endpoint, and the response must be rendered correctly in the chat interface.

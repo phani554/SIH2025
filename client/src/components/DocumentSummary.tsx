@@ -1,7 +1,8 @@
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Clock, CheckCircle } from 'lucide-react';
+// FIX: Imported XCircle icon to display for failed status.
+import { FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 interface DocumentSummaryData {
   id: string;
@@ -10,7 +11,9 @@ interface DocumentSummaryData {
   keyPoints: string[];
   confidence: number;
   processingTime: number;
-  status: 'processing' | 'completed' | 'error';
+  // FIX: Changed 'error' to 'failed' to match the backend API's status values.
+  // This makes the component's expected data type consistent with the rest of the app.
+  status: 'processing' | 'completed' | 'failed';
 }
 
 interface DocumentSummaryProps {
@@ -56,6 +59,10 @@ export default function DocumentSummary({ document }: DocumentSummaryProps) {
             {document.status === 'processing' && (
               <Clock className="w-4 h-4 text-primary animate-pulse" />
             )}
+            {/* FIX: Added an icon to indicate when processing has failed. */}
+            {document.status === 'failed' && (
+              <XCircle className="w-4 h-4 text-red-500" />
+            )}
             <Badge variant="secondary" data-testid="confidence-badge">
               {Math.round(document.confidence * 100)}% confidence
             </Badge>
@@ -69,7 +76,6 @@ export default function DocumentSummary({ document }: DocumentSummaryProps) {
       <CardContent>
         <ScrollArea className="h-80">
           <div className="space-y-6">
-            {/* Main Summary */}
             <div className="space-y-3">
               <h3 className="font-medium text-base">Executive Summary</h3>
               <p className="text-sm text-muted-foreground leading-relaxed" data-testid="summary-content">
@@ -77,7 +83,6 @@ export default function DocumentSummary({ document }: DocumentSummaryProps) {
               </p>
             </div>
 
-            {/* Key Points */}
             {document.keyPoints && document.keyPoints.length > 0 && (
               <div className="space-y-3">
                 <h3 className="font-medium text-base">Key Points</h3>
@@ -96,7 +101,6 @@ export default function DocumentSummary({ document }: DocumentSummaryProps) {
               </div>
             )}
 
-            {/* Processing Info */}
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>Processing completed in {document.processingTime}s</span>

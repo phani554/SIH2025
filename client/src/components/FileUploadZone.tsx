@@ -98,3 +98,4 @@ export default function FileUploadZone({ onFilesUpload, isProcessing }: FileUplo
     </Card>
   );
 }
+

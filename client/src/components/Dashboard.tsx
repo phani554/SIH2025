@@ -1,159 +1,136 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FileUploadZone from './FileUploadZone';
-import ProcessedFilesList, { type ProcessedFile } from './ProcessedFilesList';
+import ProcessedFilesList from './ProcessedFilesList';
 import DocumentSummary from './DocumentSummary';
 import DepartmentAssignment from './DepartmentAssignment';
 import Timeline from './Timeline';
-import GraphVisualization from './GraphVisualization';
 import ThemeToggle from './ThemeToggle';
-import { addDays, subDays } from 'date-fns';
+import { Task, getTasks, uploadFiles } from '../lib/api';
+
+// This is an extended type for the frontend to handle extra properties
+// that the child components might need.
+type FrontendTask = Task & {
+  processingTime?: number; // Kept for potential future use
+};
+
+const AVAILABLE_DEPARTMENTS = [
+  'Finance',
+  'Legal',
+  'Human Resources',
+  'Operations',
+  'Marketing',
+  'IT',
+  'Executive',
+  'Compliance',
+  'Sales',
+  'Research & Development'
+];
+
 
 export default function Dashboard() {
-  const [processedFiles, setProcessedFiles] = useState<ProcessedFile[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<any>(null);
-  const [aiSuggestion, setAiSuggestion] = useState<any>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [tasks, setTasks] = useState<FrontendTask[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedTask, setSelectedTask] =  useState<FrontendTask | null>(null);
+
+  const handleSelectTask = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    setSelectedTask(task || null);
+  };
+
+  const fetchAndSetTasks = async () => {
+    try {
+      const fetchedTasks = await getTasks();
+      // Sort tasks to show newest first using the timestamp
+      const sortedTasks = fetchedTasks.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setTasks(sortedTasks);
+
+      // If no task is selected or the selected one disappeared, select the first one
+      if ((!selectedTask || !sortedTasks.find(t => t.id === selectedTask.id)) && sortedTasks.length > 0) {
+        setSelectedTask(sortedTasks[0]);
+      }
+
+    } catch (error) {
+      console.error("Dashboard: Failed to fetch tasks", error);
+    }
+  };
 
   const handleFilesUpload = async (files: File[]) => {
-    console.log('Files uploaded:', files.map(f => f.name));
-    setIsProcessing(true);
-    setIsAnalyzing(true);
+    if (files.length === 0) return;
 
-    // Add files to processing list
-    const newFiles: ProcessedFile[] = files.map(file => ({
-      id: Date.now().toString() + Math.random(),
-      name: file.name,
-      status: 'processing'
-    }));
-
-    setProcessedFiles(prev => [...prev, ...newFiles]);
-
-    // Simulate processing and analysis
-    setTimeout(() => {
-      const processedFile = newFiles[0]; // Take first file for demo
-      
-      // Update file status
-      setProcessedFiles(prev => 
-        prev.map(file => 
-          newFiles.find(nf => nf.id === file.id)
-            ? { ...file, status: 'completed' as const, summary: 'Document analysis complete' }
-            : file
-        )
-      );
-
-      // Generate mock document summary
-      const mockSummary = {
-        id: processedFile.id,
-        fileName: processedFile.name,
-        summary: `Comprehensive analysis of ${processedFile.name} reveals key business insights including financial performance metrics, operational efficiency indicators, and strategic recommendations. The document contains critical information for departmental decision-making and compliance requirements.`,
-        keyPoints: [
-          'Revenue growth analysis with year-over-year comparisons',
-          'Operational cost optimization opportunities identified',
-          'Compliance requirements and regulatory adherence status', 
-          'Strategic recommendations for future initiatives',
-          'Risk assessment and mitigation strategies outlined'
-        ],
-        confidence: 0.89,
-        processingTime: 3.2,
-        status: 'completed' as const
-      };
-
-      // Generate AI department suggestion
-      const mockAiSuggestion = {
-        department: 'Finance',
-        confidence: 0.87,
-        reasoning: `Based on the document content analysis, this appears to be a financial document containing revenue data, budget information, and cost analysis. The presence of financial metrics and accounting terminology suggests it should be routed to the Finance department for proper handling and review.`
-      };
-
-      setSelectedDocument(mockSummary);
-      setAiSuggestion(mockAiSuggestion);
-      setIsProcessing(false);
-      setIsAnalyzing(false);
-    }, 3000);
-  };
-
-  const handleDepartmentAssign = (department: string) => {
-    console.log('Document assigned to department:', department);
-    // In a real implementation, this would update the document assignment in the backend
-  };
-
-  // TODO: remove mock functionality - Timeline data
-  const mockTimelineItems = [
-    {
-      id: '1',
-      title: 'Quarterly Tax Filing',
-      description: 'Submit Q4 tax documents and financial statements',
-      dueDate: addDays(new Date(), 7),
-      status: 'due-soon' as const,
-      department: 'Finance',
-      priority: 'high' as const
-    },
-    {
-      id: '2', 
-      title: 'Contract Review Deadline',
-      description: 'Review and approve vendor contract renewals',
-      dueDate: addDays(new Date(), 14),
-      status: 'upcoming' as const,
-      department: 'Legal',
-      priority: 'medium' as const
-    },
-    {
-      id: '3',
-      title: 'Compliance Audit',
-      description: 'Annual compliance audit completion',
-      dueDate: subDays(new Date(), 2),
-      status: 'overdue' as const,
-      department: 'Compliance',
-      priority: 'high' as const
+    setIsUploading(true);
+    try {
+      await uploadFiles(files);
+      // Immediately fetch tasks after upload to show the new 'processing' file
+      await fetchAndSetTasks();
+    } catch (error) {
+      console.error("Dashboard: File upload failed", error);
+    } finally {
+      setIsUploading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    // Fetch initial tasks when the component loads
+    fetchAndSetTasks();
+
+    // Set up a polling mechanism to refresh tasks every 5 seconds
+    const intervalId = setInterval(fetchAndSetTasks, 5000);
+
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []); // The empty dependency array ensures this runs only once on mount
+
+  // FIX: Simplified the data mapping. The status is now passed directly.
+  // The DocumentSummary component is updated to handle the 'failed' status.
+  const documentSummaryData = selectedTask ? {
+    id: selectedTask.id,
+    fileName: selectedTask.filename,
+    summary: selectedTask.summary || 'No summary available.',
+    keyPoints: selectedTask.keyPoints || [],
+    status: selectedTask.status,
+    confidence: selectedTask.departmentSuggestion?.confidence || 0,
+    processingTime: selectedTask.processingTime || 0,
+  } : undefined;
+
+  const departmentSuggestionData = selectedTask ? selectedTask.departmentSuggestion : undefined;
+  const isAnyTaskProcessing = tasks.some(task => task.status === 'processing');
 
   return (
     <div className="h-screen bg-background text-foreground">
-      {/* Header */}
       <header className="h-16 border-b flex items-center justify-between px-6">
         <div>
-          <h1 className="text-xl font-semibold" data-testid="app-title">AI Document Hub</h1>
+          <h1 className="text-xl font-semibold">AI Document Hub</h1>
           <p className="text-sm text-muted-foreground">Document Management & Department Assignment</p>
         </div>
         <ThemeToggle />
       </header>
-
-      {/* Main Content - Four Panel Layout */}
       <div className="h-[calc(100vh-4rem)] flex gap-4 p-4">
-        {/* Left Panel - File Upload & Processing (20%) */}
-        <div className="w-1/5 space-y-4">
-          <FileUploadZone 
-            onFilesUpload={handleFilesUpload}
-            isProcessing={isProcessing}
+        <div className="w-1/5 space-y-4 flex flex-col">
+          <FileUploadZone onFilesUpload={handleFilesUpload} isProcessing={isUploading || isAnyTaskProcessing} />
+          {/* FIX: This now works because ProcessedFilesList expects `filename`, which `FrontendTask` has. */}
+          <ProcessedFilesList
+            files={tasks}
+            onSelectFile={handleSelectTask}
+            selectedFileId={selectedTask?.id}
           />
-          <ProcessedFilesList files={processedFiles} />
         </div>
-
-        {/* Center Left Panel - Document Summary (30%) */}
         <div className="w-3/12">
-          <DocumentSummary document={selectedDocument} />
+          <DocumentSummary document={documentSummaryData} />
         </div>
-
-        {/* Center Right Panel - Department & Graph (30%) */}
         <div className="w-3/12 space-y-4">
+          {/* FIX: The 'departments' prop is now correctly passed. */}
           <DepartmentAssignment
-            aiSuggestion={aiSuggestion}
-            departments={['Finance', 'Legal', 'Human Resources', 'Operations', 'Marketing', 'IT', 'Executive', 'Compliance']}
-            onAssign={handleDepartmentAssign}
-            isLoading={isAnalyzing}
+            aiSuggestion={departmentSuggestionData}
+            departments={AVAILABLE_DEPARTMENTS}
+            onAssign={() => {}} // This can be implemented later
+            isLoading={selectedTask?.status === 'processing'}
           />
-          <div className="flex justify-center">
-            <GraphVisualization />
-          </div>
         </div>
-
-        {/* Right Panel - Timeline (20%) */}
         <div className="w-1/5">
-          <Timeline items={mockTimelineItems} />
+          <Timeline items={[]} />
         </div>
       </div>
     </div>
   );
 }
+

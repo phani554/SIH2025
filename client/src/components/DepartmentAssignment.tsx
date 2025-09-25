@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,7 +13,9 @@ interface DepartmentSuggestion {
 
 interface DepartmentAssignmentProps {
   aiSuggestion?: DepartmentSuggestion;
-  departments: string[];
+  // FIX: Made the 'departments' prop optional. The component can now use its
+  // internal default list if the prop isn't provided.
+  departments?: string[];
   onAssign: (department: string) => void;
   isLoading?: boolean;
 }
@@ -37,10 +39,15 @@ export default function DepartmentAssignment({
   onAssign,
   isLoading = false 
 }: DepartmentAssignmentProps) {
-  const [selectedDepartment, setSelectedDepartment] = useState<string>(
-    aiSuggestion?.department || ''
-  );
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [isAssigned, setIsAssigned] = useState(false);
+
+  // Effect to update the selected department when the AI suggestion changes
+  useEffect(() => {
+    setSelectedDepartment(aiSuggestion?.department || '');
+    setIsAssigned(false); // Reset assignment status when a new document is selected
+  }, [aiSuggestion]);
+
 
   const handleAssign = () => {
     if (selectedDepartment) {
@@ -106,7 +113,6 @@ export default function DepartmentAssignment({
           </div>
         ) : (
           <>
-            {/* AI Suggestion */}
             {aiSuggestion && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -131,7 +137,6 @@ export default function DepartmentAssignment({
               </div>
             )}
 
-            {/* Manager Override */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-secondary" />

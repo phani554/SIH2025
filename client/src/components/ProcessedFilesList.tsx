@@ -1,69 +1,64 @@
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card } from '@/components/ui/card';
-import { CheckCircle, FileText, Clock } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
 
-export interface ProcessedFile {
+// FIX: Changed 'name' to 'filename' to match the Task type from the API.
+// This resolves the primary type mismatch error from Dashboard.tsx.
+export type ProcessedFile = {
   id: string;
-  name: string;
-  status: 'processing' | 'completed' | 'error';
-  summary?: string;
-}
+  filename: string; 
+  status: 'processing' | 'completed' | 'failed';
+};
 
 interface ProcessedFilesListProps {
   files: ProcessedFile[];
+  onSelectFile: (fileId: string) => void;
+  selectedFileId?: string | null;
 }
 
-export default function ProcessedFilesList({ files }: ProcessedFilesListProps) {
+const StatusIcon = ({ status }: { status: ProcessedFile['status'] }) => {
+  switch (status) {
+    case 'processing':
+      return <Clock className="w-4 h-4 text-yellow-500" />;
+    case 'completed':
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
+    case 'failed':
+        return <XCircle className="w-4 h-4 text-red-500" />;
+    default:
+      return null;
+  }
+};
+
+export default function ProcessedFilesList({ files, onSelectFile, selectedFileId }: ProcessedFilesListProps) {
   if (files.length === 0) {
     return (
-      <Card className="p-4">
-        <div className="text-center text-muted-foreground text-sm">
-          <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p>No documents processed yet</p>
+      <Card className="flex-1 flex items-center justify-center bg-muted/25 border-dashed">
+        <div className="text-center p-4">
+          <FileText className="mx-auto w-8 h-8 text-muted-foreground" />
+          <p className="mt-2 text-sm text-muted-foreground">No documents processed yet</p>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="p-4">
-      <h3 className="font-medium text-sm mb-3" data-testid="processed-files-title">
-        Processed Documents
-      </h3>
-      <ScrollArea className="h-64">
-        <div className="space-y-2">
-          {files.map((file) => (
-            <div 
-              key={file.id}
-              className="flex items-center space-x-3 p-2 rounded-md hover:bg-accent/50 transition-colors"
-              data-testid={`file-item-${file.id}`}
-            >
-              <div className="flex-shrink-0">
-                {file.status === 'completed' && (
-                  <CheckCircle className="w-4 h-4 text-green-500" data-testid={`status-completed-${file.id}`} />
-                )}
-                {file.status === 'processing' && (
-                  <Clock className="w-4 h-4 text-primary animate-pulse" data-testid={`status-processing-${file.id}`} />
-                )}
-                {file.status === 'error' && (
-                  <div className="w-4 h-4 rounded-full bg-destructive" data-testid={`status-error-${file.id}`} />
-                )}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate" data-testid={`file-name-${file.id}`}>
-                  {file.name}
-                </p>
-                {file.summary && (
-                  <p className="text-xs text-muted-foreground truncate" data-testid={`file-summary-${file.id}`}>
-                    {file.summary}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+    <Card className="flex-1 flex flex-col">
+      <CardContent className="p-4 space-y-2 overflow-y-auto">
+        {files.map((file) => (
+          <div
+            key={file.id}
+            onClick={() => onSelectFile(file.id)}
+            className={`flex items-center space-x-3 p-2 rounded-md cursor-pointer transition-colors ${
+              selectedFileId === file.id
+                ? 'bg-primary/20'
+                : 'hover:bg-muted/50'
+            }`}
+          >
+            <StatusIcon status={file.status} />
+            {/* FIX: Using 'filename' to display the name of the file. */}
+            <span className="text-sm truncate flex-1">{file.filename}</span>
+          </div>
+        ))}
+      </CardContent>
     </Card>
   );
 }

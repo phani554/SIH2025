@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import FileUploadZone from './FileUploadZone';
 import ProcessedFilesList from './ProcessedFilesList';
 import DocumentSummary from './DocumentSummary';
@@ -7,48 +7,36 @@ import Timeline from './Timeline';
 import ThemeToggle from './ThemeToggle';
 import { Task, getTasks, uploadFiles } from '../lib/api';
 
-// This is an extended type for the frontend to handle extra properties
-// that the child components might need.
 type FrontendTask = Task & {
-  processingTime?: number; // Kept for potential future use
+  processingTime?: number;
 };
 
 const AVAILABLE_DEPARTMENTS = [
-  'Finance',
-  'Legal',
-  'Human Resources',
-  'Operations',
-  'Marketing',
-  'IT',
-  'Executive',
-  'Compliance',
-  'Sales',
-  'Research & Development'
+  'Finance', 'Legal', 'Human Resources', 'Operations', 'Marketing', 'IT', 
+  'Executive', 'Compliance', 'Sales', 'Research & Development'
 ];
-
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState<FrontendTask[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedTask, setSelectedTask] =  useState<FrontendTask | null>(null);
+  const [selectedTask, setSelectedTask] = useState<FrontendTask | null>(null);
+  
+  const pollingIntervalRef = useRef<number | null>(null);
 
   const handleSelectTask = (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t: Task) => t.id === taskId);
     setSelectedTask(task || null);
   };
 
   const fetchAndSetTasks = async () => {
     try {
       const fetchedTasks = await getTasks();
-      // Sort tasks to show newest first using the timestamp
-      const sortedTasks = fetchedTasks.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      const sortedTasks = fetchedTasks.sort((a: Task, b: Task) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setTasks(sortedTasks);
 
-      // If no task is selected or the selected one disappeared, select the first one
-      if ((!selectedTask || !sortedTasks.find(t => t.id === selectedTask.id)) && sortedTasks.length > 0) {
+      if ((!selectedTask || !sortedTasks.find((t: Task) => t.id === selectedTask.id)) && sortedTasks.length > 0) {
         setSelectedTask(sortedTasks[0]);
       }
-
     } catch (error) {
       console.error("Dashboard: Failed to fetch tasks", error);
     }
@@ -60,7 +48,6 @@ export default function Dashboard() {
     setIsUploading(true);
     try {
       await uploadFiles(files);
-      // Immediately fetch tasks after upload to show the new 'processing' file
       await fetchAndSetTasks();
     } catch (error) {
       console.error("Dashboard: File upload failed", error);
@@ -70,18 +57,32 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    // Fetch initial tasks when the component loads
     fetchAndSetTasks();
+  }, []);
 
-    // Set up a polling mechanism to refresh tasks every 5 seconds
-    const intervalId = setInterval(fetchAndSetTasks, 5000);
+  useEffect(() => {
+    const isAnyTaskProcessing = tasks.some(task => task.status === 'processing');
 
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, []); // The empty dependency array ensures this runs only once on mount
+    if (isAnyTaskProcessing) {
+      if (pollingIntervalRef.current === null) {
+        console.log("Starting polling: A task is processing.");
+        pollingIntervalRef.current = window.setInterval(fetchAndSetTasks, 5000);
+      }
+    } else {
+      if (pollingIntervalRef.current !== null) {
+        console.log("Stopping polling: All tasks are complete.");
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    }
 
-  // FIX: Simplified the data mapping. The status is now passed directly.
-  // The DocumentSummary component is updated to handle the 'failed' status.
+    return () => {
+      if (pollingIntervalRef.current !== null) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [tasks]);
+
   const documentSummaryData = selectedTask ? {
     id: selectedTask.id,
     fileName: selectedTask.filename,
@@ -107,9 +108,8 @@ export default function Dashboard() {
       <div className="h-[calc(100vh-4rem)] flex gap-4 p-4">
         <div className="w-1/5 space-y-4 flex flex-col">
           <FileUploadZone onFilesUpload={handleFilesUpload} isProcessing={isUploading || isAnyTaskProcessing} />
-          {/* FIX: This now works because ProcessedFilesList expects `filename`, which `FrontendTask` has. */}
           <ProcessedFilesList
-            files={tasks}
+            files={tasks.map(task => ({ id: task.id, name: task.filename, filename: task.filename, status: task.status }))}
             onSelectFile={handleSelectTask}
             selectedFileId={selectedTask?.id}
           />
@@ -118,11 +118,10 @@ export default function Dashboard() {
           <DocumentSummary document={documentSummaryData} />
         </div>
         <div className="w-3/12 space-y-4">
-          {/* FIX: The 'departments' prop is now correctly passed. */}
           <DepartmentAssignment
             aiSuggestion={departmentSuggestionData}
             departments={AVAILABLE_DEPARTMENTS}
-            onAssign={() => {}} // This can be implemented later
+            onAssign={() => {}} 
             isLoading={selectedTask?.status === 'processing'}
           />
         </div>

@@ -429,7 +429,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>© 2024 KMRL Document Intelligence System | Powered by Gemini AI</p>
+        <p>© 2025 KMRL Document Intelligence System | Powered by Gemini AI</p>
       </footer>
     </div>
   )

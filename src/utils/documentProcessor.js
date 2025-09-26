@@ -1,8 +1,8 @@
 import axios from 'axios';
 import Tesseract from 'tesseract.js';
 
-const GEMINI_API_KEY = 'AIzaSyAllDbwaC_grxAroMNnicJTnXyONnwSFNE';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_API_KEY = 'AIzaSyC4w_D5NGHZ4nlJBq4NaAWQAZRHfXH9b0E';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 // Convert file to base64 for image processing
 const convertToBase64 = (file) => {

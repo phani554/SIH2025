@@ -52,7 +52,7 @@ const ResultDisplay = ({ result, fileName, onNotify, onDownload, onShare, onAnal
       </div>
 
       <div className="result-grid">
-        {/* Primary Info */}
+        {/* Department Classification */}
         <div className="result-card primary">
           <div className="card-header">
             <Building2 size={20} />
@@ -61,13 +61,13 @@ const ResultDisplay = ({ result, fileName, onNotify, onDownload, onShare, onAnal
           <div className="department-badge" style={{ backgroundColor: departmentColor }}>
             {result.department}
           </div>
-          <div className="urgency-indicator">
+          <div className="urgency-indicator classifier">
             <AlertTriangle size={16} style={{ color: urgencyColor }} />
             <span style={{ color: urgencyColor }}>{result.urgency} Priority</span>
           </div>
         </div>
 
-        {/* Summary */}
+        {/* Document Analysis */}
         <div className="result-card summary">
           <div className="card-header">
             <FileText size={20} />
@@ -150,7 +150,7 @@ const ResultDisplay = ({ result, fileName, onNotify, onDownload, onShare, onAnal
           </div>
         </div>
 
-        {/* Key Details */}
+        {/* Key Information */}
         <div className="result-card details">
           <div className="card-header">
             <Users size={20} />
@@ -216,31 +216,50 @@ const ResultDisplay = ({ result, fileName, onNotify, onDownload, onShare, onAnal
           </div>
         </div>
 
-        {/* Tags */}
-        <div className="result-card tags">
-          <div className="card-header">
-            <Tag size={20} />
-            <h3>Tags & Categories</h3>
+        {/* Compact section for Tags & Categories and Document Traceability */}
+        <div className="result-grid-compact">
+          {/* Tags & Categories */}
+          <div className="result-card tags">
+            <div className="card-header">
+              <Tag size={20} />
+              <h3>Tags & Categories</h3>
+            </div>
+            
+            <div className="tag-list">
+              {result.tags?.map((tag, index) => (
+                <span key={index} className="tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
-          
-          <div className="tag-list">
-            {result.tags?.map((tag, index) => (
-              <span key={index} className="tag">
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Traceability */}
-      <div className="traceability">
-        <h4>Document Traceability</h4>
-        <div className="trace-info">
-          <span>Original File: {fileName}</span>
-          <span>Processed: {new Date().toLocaleString()}</span>
-          <span>AI Model: Gemini 2.0 Flash</span>
-          <span>Confidence: High</span>
+          {/* Document Traceability */}
+          <div className="result-card traceability-card">
+            <div className="card-header">
+              <FileText size={20} />
+              <h3>Document Traceability</h3>
+            </div>
+            
+            <div className="trace-info-compact">
+              <div className="trace-item">
+                <strong>Original File:</strong>
+                <span>{fileName}</span>
+              </div>
+              <div className="trace-item">
+                <strong>Processed:</strong>
+                <span>{new Date().toLocaleString()}</span>
+              </div>
+              <div className="trace-item">
+                <strong>AI Model:</strong>
+                <span>Gemini 2.5 Pro</span>
+              </div>
+              <div className="trace-item">
+                <strong>Confidence:</strong>
+                <span>High</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

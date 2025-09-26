@@ -17,7 +17,7 @@ const ProcessingStatus = ({ stage, progress }) => {
     <div className="processing-status fade-in-up">
       <div className="processing-header">
         <Loader2 className="spinner" size={32} />
-        <h3>🤖 AI Processing Document...</h3>
+        <h3>Processing Document...</h3>
       </div>
       
       <div className="progress-bar">

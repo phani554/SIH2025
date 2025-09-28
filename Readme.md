@@ -43,7 +43,6 @@ KMRL is flooded daily with **emails, WhatsApp messages, PDFs, and regulatory doc
 ## 🎬 **How It Works (Animated Flow)**
 
 ➡️ **Step 1: Multi-Source Ingestion**  
-<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2Q2NzE3MDEwZjQyZDc0N2Q3NDA2ZmJhYzRkNzFhZjY2ZDU1NTE0NyZjdD1n/26n6xBpxNXExDfuKc/giphy.gif" width="300"/>  
 Pull docs from **emails, WhatsApp, PDFs, uploads**.
 
 ➡️ **Step 2: Normalization & OCR**  

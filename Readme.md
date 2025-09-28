@@ -35,7 +35,7 @@ KMRL is flooded daily with **emails, WhatsApp messages, PDFs, and regulatory doc
 - 🔗 *Traces* insights back to the original source
 
 <div align="center">
-<img src="/mnt/data/322c18ec-a7fa-42e6-9183-8e8629d4cbca.png" width="750" alt="Pipeline Diagram"/>
+<img src="/public/pipeline.png" width="750" alt="Pipeline Diagram"/>
 </div>
 
 ---

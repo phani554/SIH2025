@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -22,3 +23,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+=======
+# Python virtual environment
+.venv/
+
+# Environment variables file - NEVER commit this
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Database files
+*.sqlite
+db.sqlite
+gmail_worker.py.bak
+app.py.new
+
+# Application-generated uploads - NEVER commit these
+backend/uploads/
+>>>>>>> Data_Ingestion_Gmail

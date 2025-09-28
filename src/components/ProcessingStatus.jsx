@@ -3,12 +3,12 @@ import { Loader2, Eye, Brain, Tags, Target, Clock, FileSearch } from 'lucide-rea
 
 const ProcessingStatus = ({ stage, progress }) => {
   const stages = [
-    { id: 'extracting', label: 'Extracting Text', icon: Eye, description: 'Reading document content with OCR...' },
-    { id: 'classifying', label: 'Department Classification', icon: Tags, description: 'Determining KMRL department...' },
-    { id: 'summarizing', label: 'Detailed Analysis', icon: Brain, description: 'Generating comprehensive summary...' },
-    { id: 'extracting-purpose', label: 'Purpose & Actions', icon: Target, description: 'Identifying objectives & actions...' },
-    { id: 'extracting-details', label: 'Additional Details', icon: FileSearch, description: 'Extracting compliance & risk info...' },
-    { id: 'finalizing', label: 'Finalizing', icon: Clock, description: 'Preparing results...' }
+    { id: 'extracting', label: 'Reading Document', icon: Eye},
+    { id: 'classifying', label: 'Classifying Department', icon: Tags},
+    { id: 'summarizing', label: 'Generating Summary', icon: Brain},
+    { id: 'extracting-purpose', label: 'Identifying Actions', icon: Target},
+    { id: 'extracting-details', label: 'Analysing Risk Info', icon: FileSearch},
+    { id: 'finalizing', label: 'Finalizing', icon: Clock}
   ];
 
   const currentStageIndex = stages.findIndex(s => s.id === stage);
@@ -47,7 +47,6 @@ const ProcessingStatus = ({ stage, progress }) => {
               </div>
               <div className="stage-content">
                 <h4>{stageItem.label}</h4>
-                {isActive && <p>{stageItem.description}</p>}
               </div>
             </div>
           );

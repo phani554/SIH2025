@@ -61,9 +61,9 @@ const ResultDisplay = ({ result, fileName, onNotify, onDownload, onShare, onAnal
           <div className="department-badge" style={{ backgroundColor: departmentColor }}>
             {result.department}
           </div>
-          <div className="urgency-indicator classifier">
-            <AlertTriangle size={16} style={{ color: urgencyColor }} />
-            <span style={{ color: urgencyColor }}>{result.urgency} Priority</span>
+          <div className={`urgency-indicator classifier ${result.urgencyLevel?.toLowerCase() || result.urgency?.toLowerCase() || 'medium'}`}>
+            <AlertTriangle size={16} />
+            <span>{result.urgencyLevel || result.urgency || 'Medium'} Priority</span>
           </div>
         </div>
 

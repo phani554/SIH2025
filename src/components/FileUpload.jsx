@@ -70,7 +70,6 @@ const FileUpload = ({ onFileSelect, selectedFile }) => {
         <h4>Supported Sources:</h4>
         <div className="format-tags">
           <span>📧 Email Attachments</span>
-          <span>📱 WhatsApp PDFs</span>
           <span>📄 Scanned Documents</span>
           <span>🖼️ Engineering Drawings</span>
           <span>📊 Reports & Invoices</span>

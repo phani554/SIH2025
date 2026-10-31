@@ -92,9 +92,10 @@ function Preliminary({ kind, plan, steps }) {
       <h3>Run plan</h3>
       <p className="small">
         {plan.plan.max_steps && <>max steps <strong>{plan.plan.max_steps}</strong> · </>}
-        max LLM calls <strong>{plan.plan.max_llm_calls}</strong> · max retries <strong>{plan.plan.max_retries}</strong>
+        max chat calls <strong>{plan.plan.max_llm_calls}</strong>
+        {plan.plan.decision_calls ? <> + {plan.plan.decision_calls} Decisions call</> : null} · max retries <strong>{plan.plan.max_retries}</strong>
         {plan.plan.mode && <> · mode {plan.plan.mode}, HyDE {plan.plan.hyde ? 'on' : 'off'}, top {plan.plan.top_k}</>}
-        {plan.used && <> · used: {plan.used.steps_run} steps, {plan.used.llm_calls} LLM calls</>}
+        {plan.used && <> · used: {plan.used.steps_run} steps, {plan.used.llm_calls} chat calls</>}
       </p>
       {plan.cost && (
         <p className="small">

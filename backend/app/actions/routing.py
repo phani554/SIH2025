@@ -27,8 +27,8 @@ def decide(signals: list[dict], level1, decision: dict | None, threshold: float 
     # 1. chunks vs document
     if disagreements:
         d = disagreements[0]
-        explanation = (f"Chunk #{d['chunk_no']} looks like {d['chunk_says']} ({d['matched']}), "
-                       f"but the document as a whole is {final}. {level1.reasoning}")
+        explanation = (f"Chunk #{d['chunk_no']} looks like {d['chunk_says']}, but the document as a whole "
+                       f"is {final}. {level1.reasoning}")
         if level1.why_not:
             explanation += f" Why not another department: {level1.why_not}"
     else:
@@ -57,6 +57,7 @@ def decide(signals: list[dict], level1, decision: dict | None, threshold: float 
         "final_department": final,
         "headline": headline,
         "explanation": explanation,
+        "reason": level1.reasoning + (f" Why not another department: {level1.why_not}" if level1.why_not else ""),
         "decisions_check": check,
         "decisions_probability": p_final,
         "decisions": decision,

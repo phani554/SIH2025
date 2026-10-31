@@ -3,7 +3,8 @@ from ..config import settings
 
 RULES = [f"Level 1 confidence < {settings.review_threshold}", "urgency is Critical",
          "prompt injection was quarantined", "an LLM level failed validation twice",
-         "no readable text", "embedding provider was down"]
+         "no readable text", "embedding provider was down",
+         "department unclear: Decisions API disagrees with Level 1, or is below the agreement threshold"]
 
 
 def review_gate(level1, earlier_reasons: list[str]) -> tuple[str, list[str]]:

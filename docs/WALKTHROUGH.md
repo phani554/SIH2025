@@ -16,7 +16,7 @@ The demo itself is in `DEMO_SCRIPT.md`. This file is for "walk me through the co
 ## 2. Trace one upload through the code
 
 `api/routers/documents.py: upload()` (role admin/reviewer) → `orchestrator/ingest_flow.py: process_upload()`
-1. `auth` and `plan_run`: the plan (`RUN_PLAN`) is fixed: 16 steps, max 18, max 4 LLM calls, 1 retry per level
+1. `auth` and `plan_run`: the plan (`RUN_PLAN`) is fixed: 19 steps, max 21, max 4 chat calls + 1 Decisions call, 1 retry per level
 2. `ingestion/validation.py: validate_upload()` → rejected files raise `UploadRejected`; the trace is still saved
 3. `sha256_bytes()` + `knowledge/store.find_by_sha256()` → a HIT ends the run as DUPLICATE
 4. `store.save_original()` → `ingestion/extraction.extract_pages()` (fewer than 5 words → review)

@@ -26,28 +26,30 @@ can be replayed in the UI with **Show me how**.
         ┌──────────────────┬──────────────┼───────────────────┬──────────────────┐
         ▼                  ▼              ▼                   ▼                  ▼
    INGESTION          KNOWLEDGE          LLM               ACTIONS            TRACE
-   validate upload    sha256 dedupe      OpenAI gpt-4o-mini review gate        runs + run_steps
+   validate upload    sha256 dedupe      OpenAI gpt-6-luna  review gate           runs + run_steps
    extract text       documents/chunks   (or offline rules) action items       → "Show me how"
    redact PII         FTS5 (BM25)        prompts            audit log
    quarantine         vectors (cosine)   L1 / L2 schemas
      injections       RRF fusion         validate + 1 retry
-   chunk              dept filter        HyDE, answers,
+   chunk              dept filter        Decisions API       department routing
+   chunk signals                         (dept probabilities)
+                                         HyDE, answers,
                                          citation check
 ```
 
 Only **manual upload** exists today. Gmail, WhatsApp and SharePoint/Drive are shown in the diagram as
 planned sources that would feed the same orchestrator; there is no code for them.
 
-### Upload flow (16 planned steps, at most 18 with retries, at most 4 LLM calls)
+### Upload flow (19 planned steps, at most 21 with retries, at most 4 chat calls + 1 Decisions call)
 
 | Layer | Steps |
 |---|---|
 | api | auth |
 | orchestrator | plan_run (the bounded plan shown as "Preliminary analysis") |
-| ingestion | upload_validation, extract_text, pii_redaction, injection_scan, chunking |
+| ingestion | upload_validation, extract_text, pii_redaction, injection_scan, chunking, chunk_department_signals |
 | knowledge | sha256_dedupe, save_original, index_chunks, save_results |
-| llm | embed_chunks, level1_classification, level2_extraction (each retried once if invalid) |
-| actions | review_gate, create_action_items |
+| llm | embed_chunks, level1_classification, department_decision (Decisions API), level2_extraction (L1/L2 retried once if invalid) |
+| actions | department_routing, review_gate, create_action_items |
 
 ### Question flow
 
@@ -60,7 +62,10 @@ api auth → orchestrator plan → knowledge department filter → BM25 → llm 
 |---|---|
 | Level 1 (preliminary analysis) | Department(s) with confidence, doc type, urgency, language, L1 summary. One JSON-mode call, Pydantic-validated, one retry |
 | Level 2 (KPI extraction) | Dates, amounts, reference ids, vendors, action items, each with a confidence. Input: the L1 result + the chunks |
-| Review gate | Confidence < 0.6, Critical urgency, prompt injection, a failed LLM level, no readable text, or embeddings down → NEEDS_REVIEW |
+| Departments | Eight departments, each with what it **owns** and what it is **not**, in `backend/app/departments.py`. The same table feeds the L1 prompt, the Decisions API, the offline rules and the UI ("What each department owns"). Rule: route to the department that must **act** on the document |
+| Department routing | Per-chunk keyword signals (local view) vs Level 1 (whole document, decides) vs Decisions API (probability per department, checks). A chunk that disagrees is explained, not obeyed; if the Decisions API disagrees with Level 1 or is under 0.6 sure, the document goes to review |
+| Cost | Every LLM step records tokens; each run shows tokens and an estimated USD cost (prices in `config.py`) |
+| Review gate | Confidence < 0.6, Critical urgency, department unclear (Decisions API), prompt injection, a failed LLM level, no readable text, or embeddings down → NEEDS_REVIEW |
 | Dedupe | SHA-256 of the bytes, enforced by a `UNIQUE` column |
 | Privacy | Aadhaar / PAN / phone / email masked before the LLM or the index sees the text |
 | Prompt injection | Matching lines are quarantined (never indexed, never sent to the LLM) and the document goes to review |

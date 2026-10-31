@@ -20,7 +20,9 @@ export default function Routing({ routing }) {
               <strong>{d.document_says}</strong>
             </p>
           ))}
-          <p className="small">{routing.explanation}</p>
+          <p className="small">
+            <strong>Why {routing.final_department}:</strong> {routing.reason}
+          </p>
         </div>
       )}
       {decisions && (

@@ -1,9 +1,9 @@
 {
   "provider": "openai",
-  "model": "gpt-4o-mini",
-  "generated_at": "2026-10-31T20:13:37+00:00",
-  "documents": 8,
-  "questions": 25,
+  "model": "gpt-6-luna",
+  "generated_at": "2026-10-31T20:29:34+00:00",
+  "documents": 9,
+  "questions": 27,
   "refusal_questions": 4,
   "tables": [
     {
@@ -16,9 +16,9 @@
       ],
       "rows": [
         [
-          0.88,
-          0.67,
-          0.87,
+          1.0,
+          1.0,
+          0.84,
           0.98
         ]
       ]
@@ -35,31 +35,31 @@
       "rows": [
         [
           "dates",
-          0.83,
+          0.81,
           1.0,
-          23,
-          19
+          27,
+          22
         ],
         [
           "amounts",
+          0.73,
           1.0,
-          1.0,
-          9,
-          9
+          15,
+          11
         ],
         [
           "reference_ids",
           1.0,
-          0.9,
-          9,
-          10
+          0.92,
+          11,
+          12
         ],
         [
           "vendors",
-          0.6,
           1.0,
-          5,
-          3
+          1.0,
+          4,
+          4
         ]
       ]
     },
@@ -82,7 +82,7 @@
           "safety_circular_SC-14_platform_screen_doors.txt",
           "Safety",
           "Safety",
-          "NEEDS_REVIEW"
+          "ANALYZED"
         ],
         [
           "unclean_vendor_letter_injection_pii.txt",
@@ -99,7 +99,7 @@
         [
           "contract_amendment_housekeeping_services.txt",
           "Legal",
-          "Procurement",
+          "Legal",
           "ANALYZED"
         ],
         [
@@ -118,6 +118,12 @@
           "tender_notice_cctv_upgrade.txt",
           "Procurement",
           "Procurement",
+          "ANALYZED"
+        ],
+        [
+          "work_order_WO-RS-2025-0412_bogie_overhaul.txt",
+          "Maintenance",
+          "Maintenance",
           "ANALYZED"
         ]
       ]
@@ -139,9 +145,9 @@
         ],
         [
           "vector",
+          0.87,
           1.0,
-          1.0,
-          1.0
+          0.92
         ],
         [
           "hybrid",
@@ -170,19 +176,19 @@
       "rows": [
         [
           "hybrid",
-          1.0,
+          0.96,
           1.0,
           0,
-          1.0,
-          1.05
+          0.93,
+          1.38
         ],
         [
           "hybrid+hyde",
           1.0,
           1.0,
           0,
-          1.0,
-          2.41
+          0.98,
+          3.14
         ]
       ]
     }

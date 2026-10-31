@@ -82,17 +82,18 @@ with sync_playwright() as p:
     pg.wait_for_selector(".drawer .callout")
     cl = pg.inner_text(".drawer .callout")
     check("work order drawer: chunk looks like Finance, document is Maintenance", "Finance" in cl and "Maintenance" in cl, cl[:90])
-    pg.locator(".step-box", has_text="department_routing").click(); pg.wait_for_timeout(200)
-    check("department_routing drill-down", "disagreements" in pg.inner_text(".step-detail"))
+    pg.locator(".step-box", has_text="department_routing").click(); pg.wait_for_timeout(400)
+    sd = pg.inner_text(".step-detail") if pg.locator(".step-detail").count() else ""
+    check("department_routing drill-down", "chunk_says" in sd or "chunk says" in sd.lower(), sd[:80])
     pg.locator(".drawer .prelim").scroll_into_view_if_needed(); pg.screenshot(path=OUT / "05b_work_order_routing.png")
     pg.click(".drawer button:has-text('Close')")
 
     # Documents tab
-    pg.click("nav button:has-text('Documents')"); pg.wait_for_selector("tbody tr")
-    check("documents listed", pg.locator("tbody tr").count() == 4, str(pg.locator("tbody tr").count()))
+    pg.click("nav button:has-text('Documents')"); pg.wait_for_selector(".doc-table tbody tr")
+    check("documents listed", pg.locator(".doc-table tbody tr").count() == 4, str(pg.locator(".doc-table tbody tr").count()))
     pg.click("summary:has-text('What each department owns')"); pg.wait_for_timeout(200)
     check("department definitions visible", "Not:" in pg.inner_text(".definitions"))
-    pg.locator("tbody tr", has_text="invoice").click(); pg.wait_for_selector(".detail h2")
+    pg.locator(".doc-table tbody tr", has_text="invoice").click(); pg.wait_for_selector(".detail h2")
     det = pg.inner_text(".detail")
     check("document detail L1 + L2", "Level 1" in det and "Rs. 21,71,200" in det, "")
     pg.screenshot(path=OUT / "06_document_detail.png")
@@ -139,7 +140,7 @@ with sync_playwright() as p:
     # Finance viewer
     pg.fill("input.key", VIEWER); pg.locator("input.key").blur(); pg.wait_for_timeout(300)
     pg.click("nav button:has-text('Documents')"); pg.wait_for_timeout(800)
-    rows = pg.inner_text("tbody") if pg.locator("tbody tr").count() else ""
+    rows = pg.inner_text(".doc-table tbody") if pg.locator(".doc-table tbody tr").count() else ""
     check("viewer sees only Finance docs", "safety" not in rows and "work_order" not in rows and "invoice" in rows)
     pg.click("nav button:has-text('Ask')")
     pg.fill("form input", "door sensors"); pg.select_option("form select", "Safety"); pg.click("form button")

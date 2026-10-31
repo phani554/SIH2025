@@ -60,11 +60,14 @@ with sync_playwright() as p:
         tag = f"{w}x{h}"
         for tab in ["Documents", "Ask", "Review", "Evals", "Upload"]:
             pg.click(f"nav button:has-text('{tab}')"); pg.wait_for_timeout(700)
-            if tab == "Documents" and pg.locator("tbody tr").count():
-                for i in range(pg.locator("tbody tr").count()):
-                    pg.locator("tbody tr").nth(i).click(); pg.wait_for_timeout(400)
+            if tab == "Documents" and pg.locator(".doc-table tbody tr").count():
+                for i in range(pg.locator(".doc-table tbody tr").count()):
+                    pg.locator(".doc-table tbody tr").nth(i).click(); pg.wait_for_timeout(400)
                     scan(pg, f"{tag}_documents_{i}")
-                    pg.click(".detail button:has-text('Show me how')"); pg.wait_for_selector(".drawer .step-box")
+                    btn = pg.locator(".detail button:has-text('Show me how')")
+                    if not btn.count():          # e.g. a document with no stored run
+                        continue
+                    btn.first.click(); pg.wait_for_selector(".drawer .step-box")
                     scan(pg, f"{tag}_documents_{i}_drawer")
                     for s in range(pg.locator(".step-box").count()):
                         pg.locator(".step-box").nth(s).click(); pg.wait_for_timeout(80)

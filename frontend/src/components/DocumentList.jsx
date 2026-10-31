@@ -30,7 +30,7 @@ export default function DocumentList({ refreshKey, onShowRun }) {
             {DEPARTMENTS.map((d) => <option key={d}>{d}</option>)}
           </select>
         </div>
-        <table>
+        <table className="doc-table">
           <thead><tr><th>#</th><th>File</th><th>Department</th><th>Urgency</th><th>Status</th></tr></thead>
           <tbody>
             {docs.map((d) => (

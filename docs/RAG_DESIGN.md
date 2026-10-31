@@ -80,7 +80,7 @@ Writes `evals/report_<provider>.md` and `evals/latest_<provider>.json` (the Eval
 
 **Read the committed numbers honestly.** They come from the offline rules, which were written alongside
 this small labelled set, so L1/L2 scores near 1.0 prove the harness works, not that the approach generalises.
-Run it with `LLM_PROVIDER=openai` to get gpt-4o-mini numbers, and grow the labelled set before quoting any.
+Run it with `LLM_PROVIDER=openai` to get OpenAI (gpt-6-luna) numbers, and grow the labelled set before quoting any.
 
 ## Next steps (not built, on purpose)
 

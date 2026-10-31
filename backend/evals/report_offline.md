@@ -1,6 +1,6 @@
 # MetroMind eval report (offline: offline-rules-v1)
 
-Generated 2026-10-31T19:04:11+00:00 - 8 documents - 25 questions (4 must be refused) - k = 5
+Generated 2026-10-31T20:01:09+00:00 - 8 documents - 25 questions (4 must be refused) - k = 5
 
 ### Level 1 and gate
 
@@ -38,10 +38,3 @@ Generated 2026-10-31T19:04:11+00:00 - 8 documents - 25 questions (4 must be refu
 | vector | 0.67 | 0.95 | 0.76 |
 | hybrid | 0.81 | 1.0 | 0.89 |
 | hybrid+hyde | 0.81 | 1.0 | 0.89 |
-
-### Answers
-
-| retrieval | answer_accuracy | refusal | pii_leaks | faithfulness | latency_s |
-|---|---|---|---|---|---|
-| hybrid | 0.71 | 0.75 | 0 | 0.95 | 0.0 |
-| hybrid+hyde | 0.71 | 0.75 | 0 | 0.95 | 0.0 |

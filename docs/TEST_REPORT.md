@@ -45,6 +45,28 @@ Also uploaded a real PDF (the safety circular rendered with reportlab): extracte
 
 Frontend: `npm run build` succeeds, ESLint clean.
 
+## 2b. Browser click-through: `python -m scripts.ui_check` in headless Chrome → 31 / 31
+
+Real clicks in the React app (Chrome 156 headless, 1440×900), against the running backend and Vite:
+- API key typed into the header; header shows the provider.
+- Upload tab: invoice and circular → ANALYZED, unclean letter → NEEDS_REVIEW, invoice again → "duplicate of #1",
+  `layout.dwg` → "rejected: Unsupported file type", and the rejected row still has a Show me how button.
+- Show me how on the unclean letter: drawer opens with Preliminary analysis (Finance, Invoice, urgency, L1 summary),
+  run plan (max 18 steps, max 4 LLM calls, used 16 steps / 2 calls), 6 layer lanes, 16 step boxes.
+  Clicking `pii_redaction`, `injection_scan` (shows the quarantined line), `level1_classification` (prompt,
+  validation passed, no raw phone number) and `review_gate` each opens the right drill-down; Close works.
+- Documents tab: 3 rows; invoice detail shows Level 1 and Level 2 (Rs. 21,71,200); its Show me how opens.
+- Ask tab: answer "Total payable: Rs. 21,71,200 [1]" with a *verified* badge; Show me how shows 12 steps;
+  `keyword_search_bm25` shows the MATCH string and BM25 table; `rrf_fusion` shows the fused ranks. Canteen
+  question shows "Not found in the documents."
+- Review & Audit: unclean letter in the queue, recent runs listed, Approve removes it from the queue.
+- Evals tab: report tables plus the offline warning.
+- Finance viewer key: Documents shows only Finance documents; asking with department Safety shows
+  "You can only search your own department".
+- Browser console: only the expected 400 (rejected file) and 403 (viewer) responses; no JavaScript errors.
+
+Screenshots from this run were checked by eye: lanes line up, drill-down tables render, nothing overflows.
+
 ## 3. Evals (offline provider): `python -m scripts.run_evals --answers`
 
 8 labelled documents, 25 questions (4 must be refused), k = 5.
@@ -85,6 +107,5 @@ quality; run the evals with the OpenAI key and quote those.
 
 - **Live OpenAI calls** (no key here). The adapter is unit-tested with a faked HTTP response. First thing to do
   on the laptop: put the key in `.env`, run `python -m scripts.seed_demo --load-samples`, then the evals.
-- **Visual check of the UI**: no headless browser was available in the sandbox. The UI builds and lints, the
-  dev server serves it, and every API call it makes was exercised. Click through it once before the interview.
+- **Your laptop's browser**: tested in headless Chrome on Linux, not on your Windows laptop. Click through once.
 - OCR for images (needs the Tesseract binary), Malayalam-only documents, concurrent users.

@@ -1,45 +1,24 @@
-<<<<<<< HEAD
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-=======
-# Python virtual environment
-.venv/
-
-# Environment variables file - NEVER commit this
+# Secrets: never commit
 .env
+*.env.local
 
-# Python cache
+# Python
+.venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 
-# Database files
+# Runtime data
+*.db
 *.sqlite
-db.sqlite
-gmail_worker.py.bak
-app.py.new
-
-# Application-generated uploads - NEVER commit these
 backend/uploads/
->>>>>>> Data_Ingestion_Gmail
+
+# Node
+node_modules/
+dist/
+*.log
+
+# Editors / OS
+.vscode/*
+.idea/
+.DS_Store

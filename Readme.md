@@ -1,114 +1,96 @@
-<div align="center">
+# MetroMind: Document Intelligence for KMRL
 
-# 🌐🚇 **MetroMind: Intelligent Document Automation for KMRL** 🤖📄
+*Smart India Hackathon 2025 · Problem ID 25080 · Kochi Metro Rail Limited*
 
-*Smart India Hackathon 2025 | Problem ID: 25080*
+KMRL receives a flood of emails, scanned circulars, invoices and tenders every day, in English and Malayalam.
+MetroMind ingests them, routes each one to the right department with a summary and action items,
+and lets staff ask questions that are answered **only from the documents, with citations**.
 
-✨ *Turning unstructured chaos into clear, actionable intelligence for Kochi Metro Rail Limited.* ✨
-</div>
+> v2.0 is a refactor of our hackathon prototype. The hackathon demo did classification in the browser;
+> v2 moves all AI to a FastAPI backend and adds the retrieval (RAG) layer we had designed.
 
----
+## What it does
 
-## 🚩 **The Challenge We Solve**
+| Feature | How |
+|---|---|
+| Ingest from upload or Gmail | FastAPI endpoint + Gmail API (OAuth2, offline refresh token) |
+| No duplicate processing | SHA-256 of the file bytes, enforced by a `UNIQUE` column |
+| Text extraction | pypdf for digital PDFs; Tesseract OCR (eng+hin+mal) for images |
+| Classify, summarise, extract actions | **One** LLM call in JSON mode, validated by a Pydantic schema, one retry on failure |
+| Human-in-the-loop | Confidence below 0.6 or "Critical" urgency → review queue |
+| Ask questions (RAG) | Chunk (200 words, 40 overlap) → embed → **hybrid search: BM25 (SQLite FTS5) + vector cosine, merged with Reciprocal Rank Fusion** → grounded prompt → answer with `[n]` citations |
+| Department-level access | Department filter applied **before** retrieval |
+| Traceability | Every citation links to the chunk, page and original file; every action is in `audit_log` |
+| Works offline | `LLM_PROVIDER=offline` swaps Gemini for a keyword classifier + hashed embeddings |
 
-KMRL is flooded daily with **emails, WhatsApp messages, PDFs, and regulatory documents**. This overload creates hidden risks and inefficiencies:
+## Architecture
 
-- ⏳ *Delays in Decision Making* → Managers waste hours searching documents.
-- 🏢 *Information Silos* → Departments miss critical cross-team updates.
-- 🚨 *Compliance Blind Spots* → Regulatory alerts get buried, risking audits.
-- 📉 *Knowledge Drain* → Expertise leaves when employees exit.
-- 🔁 *Redundant Effort* → Same summaries are rewritten multiple times.
+```
+React (Vite) ──HTTP──> FastAPI
+                        ├── /documents  upload → ingestion pipeline
+                        │      sha256 dedupe → extract → chunk → embed → store
+                        │      → LLM analysis (JSON) → Pydantic validation → departments, actions
+                        ├── /ask        hybrid retrieval (BM25 + vector, RRF) → grounded answer + citations
+                        ├── /documents/{id}/review   human approval / correction
+                        ├── /audit      audit trail
+                        └── /gmail      OAuth connect + sync attachments into the same pipeline
+                     SQLite: documents, chunks (+FTS5), departments, document_departments,
+                             action_items, audit_log, gmail_accounts
+                     LLM: Gemini 2.5 Flash + gemini-embedding-001 (server-side key only)
+```
 
-⚡ **Impact:** Slower operations, compliance risks, and productivity loss.
+Production path: SQLite → Postgres with pgvector (HNSW index), a job queue for ingestion, JWT + roles.
 
----
+## Project layout
 
-## 💡 **Our Vision: MetroMind**
+```
+backend/
+  app/
+    main.py              FastAPI app, CORS, routers
+    config.py            all settings from environment variables
+    db.py                schema + connection helpers + audit()
+    schemas.py           Pydantic models (LLM contract + API)
+    services/
+      extraction.py      file → pages of text
+      chunking.py        overlapping word windows
+      llm.py             GeminiProvider / OfflineProvider
+      analysis.py        one structured LLM call + validation + retry
+      ingestion.py       the full pipeline for one file
+      retrieval.py       BM25, vector search, RRF
+      rag.py             grounded answer with citations
+      gmail.py           Gmail OAuth + attachment sync
+    routers/             documents, ask, review, gmail
+  tests/                 pytest: chunking, RRF, schema, end-to-end API
+  sample_docs/           5 KMRL-style documents for the demo
+  scripts/seed_demo.py   loads the samples
+frontend/
+  src/api.js             the only place that talks to the backend
+  src/components/        UploadPanel, DocumentList, AskPanel, ReviewPanel
+```
 
-🚀 An **AI-powered automation pipeline** that:
+## Run it
 
-- 📥 *Ingests* every type of document (email, scans, chat)
-- 🧠 *Understands* context using AI classifiers
-- 🔔 *Alerts* for risks & deadlines
-- ✅ *Assigns* tasks to right teams
-- 📊 *Visualizes* data in dashboards
-- 🔗 *Traces* insights back to the original source
+```bash
+# Backend
+cd backend
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env              # add GEMINI_API_KEY, or set LLM_PROVIDER=offline
+python -m scripts.seed_demo       # optional: load sample documents
+uvicorn app.main:app --reload     # API on http://localhost:8000, docs at /docs
 
-<div align="center">
-<img src="/public/pipeline.png" width="750" alt="Pipeline Diagram"/>
-</div>
+# Frontend (new terminal)
+cd frontend
+npm install
+npm run dev                       # http://localhost:5173
 
----
+# Tests (always offline)
+cd backend && python -m pytest -q
+```
 
-## 🎬 **How It Works (Animated Flow)**
+If you switch provider after seeding, delete `metromind.db` and the `uploads/` folder and seed again:
+embeddings from different providers can't be compared.
 
-➡️ **Step 1: Multi-Source Ingestion**  
-Pull docs from **emails, WhatsApp, PDFs, uploads**.
+## Team
 
-➡️ **Step 2: Normalization & OCR**  
-🖼️ Detect language (English/Malayalam) with **Bhashini API** + OCR for scanned docs.
-
-➡️ **Step 3: AI Level 1 Classification**  
-🧩 Classify into departments → *Finance, Safety, Engineering*. Generate auto-summary.
-
-➡️ **Step 4: Semantic Understanding**  
-📚 Embed docs in **VectorDB** → enables **semantic search** (search by meaning, not keywords).
-
-➡️ **Step 5: RAG-Powered Q&A**  
-💬 Ask: *“Show vendor invoices last quarter”* → AI pulls precise results.
-
-➡️ **Step 6: KPI Extraction (Level 2 AI)**  
-📊 Extract **dates, regulation IDs, vendor names**, assign confidence scores.
-
-➡️ **Step 7: Human-in-the-Loop**  
-👨‍🏫 Low-confidence flagged for quick human review → improves models.
-
-➡️ **Step 8: GraphDB Mapping**  
-🕸️ Neo4j links entities → discover hidden relations (*e.g., contractor ↔ delay reports*).
-
-➡️ **Step 9: Actions**  
-⚡ Trigger alerts, ✅ auto-assign tasks, 📊 update dashboards.
-
-➡️ **Step 10: Traceability**  
-🔗 Every insight is linked back to its **original file** → 100% audit-proof.
-
----
-
-## 🛠️ **Technology Powerhouse**
-
-| ⚙️ Category | 🚀 Tools |
-|-------------|-----------|
-| **AI / ML** | HuggingFace, LangChain, Tesseract OCR |
-| **Databases** | PostgreSQL, MongoDB, Neo4j (GraphDB), ChromaDB |
-| **Backend** | FastAPI (Python) |
-| **Authentication** | Google OAuth2 |
-| **Deployment** | Docker, GitHub Actions |
-
----
-
-## 🌟 **Why MetroMind Stands Out**
-
-✨ Judges will see **real impact**:
-
-- 🚇 Tailored for **Metro-scale enterprises**
-- 🧠 Combines *OCR + NLP + Graph Intelligence* seamlessly
-- 🔔 Converts raw text → *decisions, alerts, dashboards*
-- 🔗 Transparent & auditable system (no black-box AI)
-
----
-
-## 🔮 **Future Scope**
-
-- 🌐 Add SharePoint & WhatsApp Business ingestion
-- 📊 Richer multilingual dashboards
-- 🔮 Predictive compliance alerts using trends
-- 🤝 Expand to other Smart Cities 🚦
-
----
-
-
----
-
-### 🌐 *MetroMind: Empowering Kochi Metro with Intelligent Automation* 🚇🤖
-
-</div>
+Built for SIH 2025 by our team. v2 refactor by Venkat Phaneendra Nittala.

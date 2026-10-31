@@ -1,0 +1,36 @@
+.app { max-width: 1200px; margin: 0 auto; padding: 24px; }
+header { display: flex; justify-content: space-between; align-items: center; }
+h1 { font-size: 1.6rem; margin: 0; }
+h2 { font-size: 1.15rem; margin: 0 0 12px; }
+h3 { font-size: 0.95rem; margin: 16px 0 4px; }
+nav { display: flex; gap: 8px; margin: 20px 0; }
+nav button { background: #fff; color: #0b3d5c; border: 1px solid #c9d6e2; }
+nav button.active { background: #0b3d5c; color: #fff; }
+button { background: #0b3d5c; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: default; }
+input, select { padding: 8px 10px; border: 1px solid #c9d6e2; border-radius: 8px; font: inherit; }
+input { flex: 1; }
+.card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 16px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.row { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.dropzone { border: 2px dashed #9fb6cb; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; color: #4a6378; }
+.dropzone.active { background: #eef5fb; border-color: #0b3d5c; }
+.upload-results { list-style: none; padding: 0; }
+.upload-results li { padding: 6px 0; border-bottom: 1px solid #eef2f6; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eef2f6; }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover { background: #f5f9fc; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; background: #e8eef4; color: #23425c; }
+.badge.green { background: #dff3e4; color: #1d6b35; }
+.badge.amber { background: #fdf0d5; color: #8a5a00; }
+.badge.red { background: #fbe1df; color: #a1271c; }
+.badge.grey { background: #eceff2; color: #555; }
+.muted { color: #6b7f90; font-weight: normal; }
+.answer { margin-top: 16px; }
+.answer > p { font-size: 1.05rem; }
+.citation { border-left: 3px solid #0b3d5c; padding: 4px 12px; margin: 8px 0; }
+.citation p { margin: 4px 0 0; font-size: 0.85rem; }
+.review-item { padding: 8px 0; border-bottom: 1px solid #eef2f6; }
+.detail p { line-height: 1.5; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; } }

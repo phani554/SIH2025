@@ -134,7 +134,7 @@ with sync_playwright() as p:
     # Evals
     pg.click("nav button:has-text('Evals')"); pg.wait_for_selector("text=Eval report")
     ev = pg.inner_text("main")
-    check("evals tab shows report + offline warning", "L1 accuracy" in ev and "Offline rules" in ev)
+    check("evals tab shows report + provider label", "L1 accuracy" in ev and ("Offline rules" in ev or "openai" in ev.lower()))
     pg.screenshot(path=OUT / "11_evals.png", full_page=True)
 
     # Finance viewer

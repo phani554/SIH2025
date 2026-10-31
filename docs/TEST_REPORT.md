@@ -1,9 +1,32 @@
 # MetroMind v3: test report
 
+## 0. Live run with OpenAI (1 Nov 2026, 01:59-02:03 IST)
+
+Models: **gpt-6-luna** (chat, `reasoning_effort: low`), **text-embedding-3-small**, **Decisions API** (gpt-6-luna).
+Fresh database for each phase, rate limit raised to 1000/min for the scripts only.
+
+| Check | Result |
+|---|---|
+| `scripts/e2e_check.py` (API end to end, incl. work-order routing trap and cost in trace) | **30 / 30** |
+| `scripts/interview_checks.py` (4 boundary documents, 4 tricky questions, 1 access check) | **9 / 9** |
+| `scripts/ui_check.py` (headless Chrome click-through) | 34 / 35; the miss was the script still expecting the *offline* label on the Evals tab. Script fixed; not re-run live |
+| `scripts/ui_layout_check.py` (every tab + every drawer + every step at 1366×768, 1280×720, 1920×1080) | **No overflowing text** |
+| Evals: 9 docs, 27 questions | L1 **1.0**, gate **1.0**, L2 P/R **0.84 / 0.98**, hybrid hit@1 **1.0**, answers **0.96** (HyDE **1.0**), refusal **1.0**, PII leaks **0** |
+| Cost per upload (invoice) | 2,170 tokens in / 645 out ≈ **$0.0005** |
+
+Boundary documents: fire-extinguisher tender → Procurement (Decisions 1.00), extinguisher refill invoice → Finance (0.97),
+leave rules for station staff → HR (1.00), CMRS evacuation drill → Safety (0.99).
+Work order trap: chunk #2 signals Finance, document routed to Maintenance, Decisions API agrees (1.00).
+
+Earlier live run with gpt-4o-mini (before department definitions and the urgency scale): contract amendment → Procurement
+(should be Legal), safety circular rated Critical → held for review. Both fixed; gpt-4o-mini is now marked deprecated by OpenAI.
+
+## Offline run (below)
+
 Tested on 1 Nov 2026 (IST) in a Linux sandbox, Python 3.12, Node 20. **Provider: offline** (rule-based).
 No OpenAI key was available, and the old leaked Gemini key was deliberately not used.
 
-## 1. Automated tests: `python -m pytest -q` → 44 passed
+## 1. Automated tests: `python -m pytest -q` → 51 passed (44 below + 7 routing/cost tests in `tests/test_routing.py`)
 
 | Area | Tests | Result |
 |---|---|---|

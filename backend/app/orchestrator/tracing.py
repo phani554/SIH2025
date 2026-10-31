@@ -22,6 +22,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
+from ..config import PRICES_PER_1M
+
 MAX_FIELD_CHARS = 20_000   # keep huge prompts from bloating the database
 
 LAYERS = ("api", "orchestrator", "ingestion", "knowledge", "llm", "actions")
@@ -77,11 +79,31 @@ class Tracer:
         """Chat-model calls (steps that sent a prompt); embedding calls are not counted."""
         return sum(1 for s in self.steps if "prompt" in s.detail and s.status != "skipped")
 
+    def cost(self) -> dict:
+        """Token totals and an ESTIMATED cost in USD, from the token counts each LLM step recorded."""
+        total_in = total_out = 0
+        usd = 0.0
+        for s in self.steps:
+            tok = s.detail.get("tokens") or {}
+            if not tok:
+                continue
+            tin, tout = tok.get("prompt") or 0, tok.get("completion") or 0
+            total_in, total_out = total_in + tin, total_out + tout
+            model = str(s.detail.get("model") or "")
+            key = "gpt-6-luna/decisions" if s.name == "department_decision" else \
+                next((k for k in PRICES_PER_1M if "/" not in k and model.startswith(k)), None)
+            if key:
+                usd += (tin * PRICES_PER_1M[key]["input"] + tout * PRICES_PER_1M[key]["output"]) / 1e6
+        return {"input_tokens": total_in, "output_tokens": total_out, "usd_estimate": round(usd, 6),
+                "note": "estimate from token counts x prices in config.py"}
+
     def finish(self, status: str, summary: str = "") -> None:
         self.status, self.summary = status, summary
 
     def save(self, conn) -> int:
         duration = round((time.perf_counter() - self._t0) * 1000, 2)
+        if self.plan is not None:
+            self.plan["cost"] = self.cost()
         cur = conn.execute(
             """INSERT INTO runs(kind, doc_id, actor, role, department, status, summary,
                                 plan_json, started_at, duration_ms)

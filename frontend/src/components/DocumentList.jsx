@@ -1,16 +1,24 @@
 import { useEffect, useState } from 'react';
 import { api, DEPARTMENTS } from '../api';
+import Routing from './Routing';
 
 export default function DocumentList({ refreshKey, onShowRun }) {
   const [docs, setDocs] = useState([]);
   const [department, setDepartment] = useState('');
   const [selected, setSelected] = useState(null);
+  const [error, setError] = useState('');
+  const [definitions, setDefinitions] = useState(null);
+
+  useEffect(() => { api.departments().then(setDefinitions).catch(() => setDefinitions(null)); }, []);
 
   useEffect(() => {
     api.listDocuments(department ? { department } : {}).then(setDocs).catch(() => setDocs([]));
   }, [department, refreshKey]);
 
-  const open = async (id) => setSelected(await api.getDocument(id));
+  const open = async (id) => {
+    setError('');
+    try { setSelected(await api.getDocument(id)); } catch (e) { setError(e.message); }
+  };
 
   return (
     <div className="split">
@@ -33,6 +41,20 @@ export default function DocumentList({ refreshKey, onShowRun }) {
             ))}
           </tbody>
         </table>
+        {error && <p className="badge red">{error}</p>}
+        {definitions && (
+          <details className="definitions">
+            <summary>What each department owns</summary>
+            <p className="small"><strong>Rule:</strong> {definitions.rule}</p>
+            <table className="small">
+              <tbody>
+                {definitions.departments.map((d) => (
+                  <tr key={d.name}><th>{d.name}</th><td>{d.owns} <span className="muted">Not: {d.not}</span></td></tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
+        )}
       </section>
       {selected && <DocumentDetail doc={selected} onShowRun={onShowRun} />}
     </div>
@@ -57,6 +79,7 @@ function DocumentDetail({ doc, onShowRun }) {
         <p className="badge amber">Held for review: {doc.review_reasons.join('; ')}</p>
       )}
       <button className="link" onClick={() => api.openFile(doc.doc_id)}>Open original file</button>
+      {doc.routing && (<><h3>Department routing</h3><Routing routing={doc.routing} /></>)}
       {l1 && (
         <>
           <h3>Level 1 · preliminary analysis</h3>

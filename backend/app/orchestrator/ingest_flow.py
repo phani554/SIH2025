@@ -4,9 +4,10 @@ and records each one in the trace. Layers never call each other sideways.
     api        auth
     orch       plan_run                     (the bounded plan: max steps, max LLM calls)
     ingestion  upload_validation -> extract_text -> pii_redaction -> injection_scan -> chunking
+               -> chunk_department_signals (keyword vote per chunk, no LLM)
     knowledge  sha256_dedupe, save_original, index_chunks, save_results
-    llm        embed_chunks, level1_classification, level2_extraction
-    actions    review_gate, create_action_items
+    llm        embed_chunks, level1_classification, department_decision (Decisions API), level2_extraction
+    actions    department_routing (chunks vs Level 1 vs Decisions), review_gate, create_action_items
 
 Manual upload is the only source today.
 """
@@ -16,14 +17,17 @@ from dataclasses import dataclass
 
 from ..actions.audit import audit
 from ..actions.gate import RULES, review_gate
+from ..actions.routing import decide as decide_department
 from ..actions.tasks import create_action_items
 from ..config import settings
 from ..ingestion.chunking import chunk_pages
 from ..ingestion.extraction import extract_pages
 from ..ingestion.injection import quarantine_injections
 from ..ingestion.redaction import redact_pages
+from ..ingestion.signals import chunk_signals
 from ..ingestion.validation import UploadRejected, safe_file_name, sha256_bytes, validate_upload
 from ..knowledge import store
+from ..llm.decisions import department_decision
 from ..llm.providers import LLMError
 from ..llm.structured import MAX_RETRIES, LevelFailed, level1, level2
 from .tracing import Tracer
@@ -31,15 +35,16 @@ from .tracing import Tracer
 # The plan is fixed and known before we start, so a run is bounded:
 # it can never loop or call the LLM more than this.
 PLANNED_STEPS = ["auth", "plan_run", "upload_validation", "sha256_dedupe", "save_original", "extract_text",
-                 "pii_redaction", "injection_scan", "chunking", "embed_chunks", "index_chunks",
-                 "level1_classification", "level2_extraction", "review_gate", "create_action_items",
-                 "save_results"]
+                 "pii_redaction", "injection_scan", "chunking", "chunk_department_signals", "embed_chunks",
+                 "index_chunks", "level1_classification", "department_decision", "level2_extraction",
+                 "department_routing", "review_gate", "create_action_items", "save_results"]
 LLM_LEVELS = 2
 RUN_PLAN = {
     "steps": PLANNED_STEPS,
     "max_retries": MAX_RETRIES,                                   # per LLM level
     "max_llm_calls": LLM_LEVELS * (1 + MAX_RETRIES),              # 2 levels x (1 try + 1 retry) = 4
-    "max_steps": len(PLANNED_STEPS) + LLM_LEVELS * MAX_RETRIES,   # 16 + 2 retry steps = 18
+    "max_steps": len(PLANNED_STEPS) + LLM_LEVELS * MAX_RETRIES,   # 19 + 2 retry steps = 21
+    "decision_calls": 1,                                          # Decisions API, no retry
     "embedding_calls": 1,
 }
 
@@ -156,12 +161,22 @@ def _ingest(conn, llm, tracer: Tracer, file_name: str, data: bytes, strategy, up
         s.detail = {"chunks": [{"no": c.chunk_no, "page": c.page, "words": len(c.text.split()),
                                 "preview": c.text[:120]} for c in chunks]}
 
+    with tracer.step("chunk_department_signals", "ingestion") as s:
+        signals = chunk_signals(chunks)
+        s.input = f"{len(chunks)} chunk(s), keyword lists from departments.py"
+        s.output = ", ".join(f"#{x['chunk_no']}→{x['signal'] or '-'}" for x in signals)
+        s.detail = {"signals": signals,
+                    "note": "a cheap vote per chunk; the document is routed by Level 1, these are evidence"}
+
     # If the embedding API is down we still keep the text: keyword search keeps working.
     with tracer.step("embed_chunks", "llm") as s:
         s.input = f"{len(chunks)} chunk(s) to {llm.name} embeddings"
         try:
+            before = llm.last_embed_tokens
             vectors = llm.embed([c.text for c in chunks])
             s.output = f"{len(vectors)} vector(s) of {len(vectors[0])} dims"
+            s.detail = {"model": llm.embed_model,
+                        "tokens": {"prompt": llm.last_embed_tokens - before, "completion": 0}}
         except LLMError as exc:
             vectors = [None] * len(chunks)
             s.status, s.output = "failed", f"embedding failed: {str(exc)[:200]}"
@@ -180,6 +195,14 @@ def _ingest(conn, llm, tracer: Tracer, file_name: str, data: bytes, strategy, up
     except LevelFailed as exc:
         reasons.append(f"Level 1 failed: {str(exc)[:120]}")
 
+    # SECOND OPINION on the department (Decisions API: real probabilities, ~$0.0001).
+    decision = None
+    if lvl1 and settings.use_decisions_api:
+        decision = department_decision(llm, tracer, "\n".join(p.text for p in pages))
+    else:
+        tracer.skip("department_decision", "llm",
+                    "USE_DECISIONS_API=false" if lvl1 else "Level 1 did not produce a valid result")
+
     # LEVEL 2: entities, from the Level 1 result + the chunks.
     if lvl1:
         try:
@@ -189,10 +212,23 @@ def _ingest(conn, llm, tracer: Tracer, file_name: str, data: bytes, strategy, up
     else:
         tracer.skip("level2_extraction", "llm", "Level 1 did not produce a valid result")
 
-    return _finish(conn, tracer, doc_id, lvl1, lvl2, reasons)
+    routing = None
+    if lvl1:
+        with tracer.step("department_routing", "actions") as s:
+            routing = decide_department(signals, lvl1, decision, settings.department_agreement_threshold)
+            s.input = "chunk signals + Level 1 + Decisions API"
+            s.output = routing["headline"]
+            s.detail = routing
+        tracer.plan["routing"] = routing
+        if routing["review_reason"]:
+            reasons.append(routing["review_reason"])
+    else:
+        tracer.skip("department_routing", "actions", "no Level 1 result")
+
+    return _finish(conn, tracer, doc_id, lvl1, lvl2, reasons, routing)
 
 
-def _finish(conn, tracer: Tracer, doc_id: int, lvl1, lvl2, reasons: list[str]) -> IngestResult:
+def _finish(conn, tracer: Tracer, doc_id: int, lvl1, lvl2, reasons: list[str], routing=None) -> IngestResult:
     with tracer.step("review_gate", "actions") as s:
         status, reasons = review_gate(lvl1, reasons)
         s.output = f"{status}: " + ("; ".join(reasons) if reasons else "all checks passed")
@@ -206,7 +242,7 @@ def _finish(conn, tracer: Tracer, doc_id: int, lvl1, lvl2, reasons: list[str]) -
         tracer.skip("create_action_items", "actions", "no Level 2 result")
 
     with tracer.step("save_results", "knowledge") as s:
-        store.save_analysis(conn, doc_id, lvl1, lvl2, status, reasons)
+        store.save_analysis(conn, doc_id, lvl1, lvl2, status, reasons, routing)
         s.output = f"document #{doc_id} saved as {status}"
     audit(conn, "ANALYZE", json.dumps({"status": status, "reasons": reasons}), doc_id, actor=tracer.actor)
 

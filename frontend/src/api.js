@@ -34,6 +34,7 @@ export const api = {
   },
   listDocuments: (params = {}) => request(`/documents?${new URLSearchParams(params)}`),
   getDocument: (id) => request(`/documents/${id}`),
+  departments: () => request('/departments'),
   // Downloads need the key header too, so fetch the file and open it as a blob.
   openFile: async (id) => {
     const res = await fetch(`${BASE}/documents/${id}/file`, { headers: { 'X-API-Key': getKey() } });

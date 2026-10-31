@@ -9,7 +9,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
-from ..config import DEPARTMENTS
+from ..departments import DEPARTMENTS
 
 Urgency = Literal["Critical", "High", "Medium", "Low"]
 Priority = Literal["High", "Medium", "Low"]
@@ -37,6 +37,7 @@ class Level1Result(BaseModel):
     language: str = "English"
     summary: str = Field(min_length=1, max_length=800)
     reasoning: str
+    why_not: str = ""          # the strongest other department and why it lost
 
     @property
     def primary(self) -> DepartmentScore:

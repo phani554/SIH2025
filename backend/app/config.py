@@ -16,8 +16,10 @@ load_dotenv()
 class Settings:
     llm_provider: str = os.getenv("LLM_PROVIDER", "openai")        # openai | offline
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
-    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-6-luna")
     openai_embed_model: str = os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small")
+    use_decisions_api: bool = os.getenv("USE_DECISIONS_API", "true").lower() == "true"
+    department_agreement_threshold: float = float(os.getenv("DEPARTMENT_AGREEMENT_THRESHOLD", "0.6"))
 
     db_path: str = os.getenv("DB_PATH", "metromind.db")
     upload_dir: str = os.getenv("UPLOAD_DIR", "uploads")
@@ -31,7 +33,7 @@ class Settings:
     # Security
     auth_enabled: bool = os.getenv("AUTH_ENABLED", "true").lower() == "true"
     redact_pii: bool = os.getenv("REDACT_PII", "true").lower() == "true"
-    rate_limit_per_minute: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "30"))
+    rate_limit_per_minute: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "120"))
     max_upload_mb: int = int(os.getenv("MAX_UPLOAD_MB", "15"))
 
 
@@ -42,7 +44,14 @@ class Settings:
 
 settings = Settings()
 
-DEPARTMENTS = [
-    "Engineering", "Operations", "Maintenance", "Safety",
-    "Finance", "HR", "Legal", "Procurement",
-]
+from .departments import DEPARTMENTS  # noqa: E402  (definitions live in departments.py)
+
+
+# USD per 1M tokens, from developers.openai.com model pages (checked 1 Nov 2026).
+# Used only to show an ESTIMATED cost per run in the trace. Edit if prices change.
+PRICES_PER_1M = {
+    "gpt-6-luna": {"input": 0.10, "output": 0.50},
+    "gpt-6-luna/decisions": {"input": 0.10, "output": 0.0},     # Decisions API: output is free
+    "gpt-4o-mini": {"input": 0.15, "output": 0.60},
+    "text-embedding-3-small": {"input": 0.02, "output": 0.0},
+}

@@ -98,7 +98,10 @@ def search(conn, llm, question: str, department: str | None, top_k: int, mode: s
         else:
             tracer.skip("hyde_generation", "llm", "HyDE off: embedding the question itself")
         with tracer.step("embed_query", "llm") as s:
+            before = llm.last_embed_tokens
             query_vec = llm.embed([query_text])[0]
+            s.detail["tokens"] = {"prompt": llm.last_embed_tokens - before, "completion": 0}
+            s.detail["model"] = llm.embed_model
             s.input = "question + HyDE passage" if use_hyde else "question"
             s.output = f"1 vector of {query_vec.size} dims ({llm.name})"
         with tracer.step("vector_search_cosine", "knowledge") as s:

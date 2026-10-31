@@ -63,6 +63,7 @@ def get_document(doc_id: int, conn=Depends(get_db), user: User = Depends(current
     doc["level1"] = json.loads(doc.pop("l1_json") or "null")
     doc["level2"] = json.loads(doc.pop("l2_json") or "null")
     doc["review_reasons"] = json.loads(doc["review_reasons"] or "[]")
+    doc["routing"] = json.loads(doc.pop("routing_json") or "null")
     doc["departments"] = [dict(r) for r in conn.execute(
         """SELECT dep.name, dd.is_primary, dd.confidence FROM document_departments dd
            JOIN departments dep ON dep.dept_id = dd.dept_id WHERE dd.doc_id = ?

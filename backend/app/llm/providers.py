@@ -21,8 +21,10 @@ import numpy as np
 import requests
 
 from ..config import settings
+from ..departments import KEYWORDS, keyword_scores
 
 OPENAI_BASE = "https://api.openai.com/v1"
+DECISIONS_MODEL = "gpt-6-luna"
 OFFLINE_DIM = 768
 
 
@@ -50,6 +52,7 @@ class OpenAIProvider:
 
     def __init__(self, api_key: str, model: str, embed_model: str):
         self.api_key, self.model, self.embed_model = api_key, model, embed_model
+        self.last_embed_tokens = 0          # read by the trace for the cost estimate
 
     def _post(self, path: str, body: dict) -> dict:
         try:
@@ -62,8 +65,11 @@ class OpenAIProvider:
         return resp.json()
 
     def generate(self, prompt: str, json_mode: bool = False) -> LLMReply:
-        body = {"model": self.model, "temperature": 0.1,
-                "messages": [{"role": "user", "content": prompt}]}
+        body = {"model": self.model, "messages": [{"role": "user", "content": prompt}]}
+        if self.model.startswith("gpt-4"):
+            body["temperature"] = 0.1                 # older models: low randomness
+        else:
+            body["reasoning_effort"] = "low"          # gpt-6 family: fixed temperature, keep thinking cheap
         if json_mode:
             body["response_format"] = {"type": "json_object"}   # reply is guaranteed to parse
         data = self._post("/chat/completions", body)
@@ -75,27 +81,24 @@ class OpenAIProvider:
         return LLMReply(text.strip(), data.get("model", self.model),
                         usage.get("prompt_tokens"), usage.get("completion_tokens"))
 
+    def decide(self, text: str, questions: list[dict]) -> dict:
+        """OpenAI Decisions API: typed answers with real probabilities (choice / score / predicate).
+        Only gpt-6-luna is supported there. Input costs $0.10 per 1M tokens; output tokens are free."""
+        return self._post("/decisions", {"model": DECISIONS_MODEL, "input": text, "questions": questions})
+
     def embed(self, texts: list[str]) -> list[np.ndarray]:
         vectors = []
         for start in range(0, len(texts), 100):
             data = self._post("/embeddings", {"model": self.embed_model,
                                               "input": texts[start:start + 100]})
             vectors += [normalize(np.array(d["embedding"], dtype=np.float32)) for d in data["data"]]
+            self.last_embed_tokens += data.get("usage", {}).get("total_tokens", 0)
         return vectors
 
 
 # ---------------------------------------------------------------- Offline
 
-DEPARTMENT_KEYWORDS = {
-    "Engineering": ["signal", "track", "viaduct", "electrical", "drawing", "design", "civil"],
-    "Operations": ["timetable", "passenger", "headway", "ridership", "train service", "station staff"],
-    "Maintenance": ["maintenance", "repair", "rolling stock", "overhaul", "bogie", "preventive", "depot"],
-    "Safety": ["safety", "incident", "fire", "evacuation", "cmrs", "hazard", "emergency", "accident"],
-    "Finance": ["invoice", "payment", "budget", "gst", "payable", "revenue", "₹", "rs."],
-    "HR": ["employee", "recruitment", "leave", "training", "salary", "attendance"],
-    "Legal": ["contract", "agreement", "clause", "legal", "court", "arbitration"],
-    "Procurement": ["tender", "purchase order", "supplier", "quotation", "procurement", "bid"],
-}
+DEPARTMENT_KEYWORDS = KEYWORDS          # from departments.py, shared with the prompt and the UI
 DOC_TYPES = [("invoice", "Invoice"), ("circular", "Circular"), ("tender", "Tender Notice"),
              ("amendment", "Contract Amendment"), ("report", "Report"), ("notice", "Notice"),
              ("letter", "Letter")]
@@ -125,6 +128,8 @@ class OfflineProvider:
     """Deterministic stand-in for the LLM. Simple on purpose: easy to explain."""
     name = "offline"
     model = "offline-rules-v1"
+    embed_model = "offline-hashing"
+    last_embed_tokens = 0
 
     def generate(self, prompt: str, json_mode: bool = False) -> LLMReply:
         if prompt.startswith("LEVEL 1"):
@@ -141,7 +146,10 @@ class OfflineProvider:
     # Level 1: departments, type, urgency, short summary
     def _level1(self, doc: str) -> dict:
         text = doc.lower()
-        scores = {d: sum(text.count(k) for k in kws) for d, kws in DEPARTMENT_KEYWORDS.items()}
+        # The opening lines (title / subject) say what the document is FOR, so they count 3x:
+        # a crude version of the routing rule "who must act on it, not which words are most common".
+        head = "\n".join(text.strip().splitlines()[:4])
+        scores = {d: sum(text.count(k) + 2 * head.count(k) for k in kws) for d, kws in DEPARTMENT_KEYWORDS.items()}
         ranked = [d for d in sorted(scores, key=scores.get, reverse=True) if scores[d]]
         if not ranked:
             departments = [{"name": "Operations", "confidence": 0.2}]
@@ -171,7 +179,9 @@ class OfflineProvider:
             "urgency": urgency,
             "language": language,
             "summary": " ".join([s for s in sentences(doc) if len(s.split()) >= 8][:2])[:400] or doc.strip()[:400],
-            "reasoning": f"Offline keyword rules: {hits} keyword hits for {departments[0]['name']}.",
+            "reasoning": f"Offline keyword rules: {hits} weighted keyword hits for {departments[0]['name']} "
+                         f"(title words count 3x).",
+            "why_not": (f"{ranked[1]} scored {scores[ranked[1]]}, lower than {hits}." if len(ranked) > 1 else ""),
         }
 
     # Level 2: entities found with regexes over the chunks
@@ -216,6 +226,19 @@ class OfflineProvider:
         if best is None or best_overlap < min(2, len(q_stems)):
             return "Not found in the documents."
         return best
+
+    def decide(self, text: str, questions: list[dict]) -> dict:
+        """Offline stand-in for the Decisions API: keyword scores turned into shares (not real probabilities)."""
+        answers = []
+        for q in questions:
+            values = [c["value"] for c in q["choices"]]
+            scores = {v: s["score"] for v, s in keyword_scores(text).items() if v in values}
+            total = sum(scores.values()) or 1
+            probs = [{"value": v, "probability": round(scores.get(v, 0) / total, 2)} for v in values]
+            best = max(probs, key=lambda p: p["probability"])
+            answers.append({"type": "choice", "name": q["name"], "choice": best["value"],
+                            "probabilities": probs, "confidence": best["probability"]})
+        return {"model": "offline-keyword-shares", "answers": answers, "usage": {"input_tokens": 0}}
 
     def embed(self, texts: list[str]) -> list[np.ndarray]:
         """Feature hashing: each word adds 1 to a bucket chosen by its hash."""

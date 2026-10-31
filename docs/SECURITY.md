@@ -6,7 +6,7 @@
 | Anyone can call the API | `X-API-Key` on every request; only the SHA-256 of each key is stored; keys shown once | `api/auth.py`, `scripts/create_api_key.py` | `auth` (api) |
 | Over-broad access | Roles: admin (all), reviewer (all departments, approve, audit), viewer (own department only) | `require_role()` | `auth` |
 | Cross-department leaks through RAG | Viewer's department comes from their key, and the filter runs **before** retrieval | `allowed_department()`, `knowledge/retrieval.docs_in_department()` | `department_filter` (knowledge) |
-| Abuse / cost | 30 requests per minute per key, sliding window | `check_rate_limit()` | `auth` detail shows "n of 30 this minute" |
+| Abuse / cost | 120 requests per minute per key (set in .env), sliding window | `check_rate_limit()` | `auth` detail shows "n of 120 this minute" |
 | Malicious or junk uploads | 15 MB limit, empty-file check, extension allowlist, magic bytes (`.pdf` must start with `%PDF`), safe file names | `ingestion/validation.py` | `upload_validation` (rejected uploads are traced too) |
 | Duplicate processing | SHA-256 of the bytes, `UNIQUE` column; no LLM spend on a duplicate | `ingestion/validation.sha256_bytes`, `knowledge/store.find_by_sha256` | `sha256_dedupe` |
 | Personal data sent to the LLM or stored | Aadhaar, PAN, phone, email masked before chunking, embedding and analysis | `ingestion/redaction.py` | `pii_redaction` (counts + preview after masking) |

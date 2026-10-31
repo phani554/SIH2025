@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .departments import DEPARTMENT_DEFINITIONS, ROUTING_RULE
 from .db import init_db
 from .api.deps import get_llm
 from .api.routers import ask, documents, review, runs
@@ -37,4 +38,13 @@ def health():
     llm = get_llm()
     return {"status": "ok", "llm_provider": llm.name, "model": getattr(llm, "model", ""),
             "auth": settings.auth_enabled,
-            "chunk_strategy": settings.chunk_strategy, "hyde_default": settings.use_hyde}
+            "chunk_strategy": settings.chunk_strategy, "hyde_default": settings.use_hyde,
+            "decisions_api": settings.use_decisions_api and llm.name == "openai"}
+
+
+@app.get("/departments")
+def departments():
+    """What each department owns and where its boundary is (public: no document content)."""
+    return {"rule": ROUTING_RULE,
+            "departments": [{"name": n, "owns": d["owns"], "not": d["not"], "keywords": d["keywords"]}
+                            for n, d in DEPARTMENT_DEFINITIONS.items()]}

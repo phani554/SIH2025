@@ -17,7 +17,7 @@ import json
 
 from pydantic import BaseModel, ValidationError
 
-from ..config import DEPARTMENTS
+from ..departments import DEPARTMENTS, ROUTING_RULE, definitions_for_prompt
 from .prompts import LEVEL1_PROMPT, LEVEL2_PROMPT
 from .providers import LLMError
 from .schemas import Level1Result, Level2Result
@@ -66,6 +66,8 @@ def run_level(llm, tracer, step_name: str, build_prompt, schema: type[BaseModel]
 def level1(llm, tracer, text: str) -> Level1Result:
     return run_level(llm, tracer, "level1_classification",
                      lambda note: LEVEL1_PROMPT.format(departments=json.dumps(DEPARTMENTS),
+                                                       definitions=definitions_for_prompt(),
+                                                       rule=ROUTING_RULE,
                                                        retry_note=note, text=text[:MAX_CHARS]),
                      Level1Result)
 

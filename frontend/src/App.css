@@ -65,3 +65,19 @@ button.link { background: none; color: #0b5f8f; padding: 0; text-decoration: und
 .detail-key { font-size: 0.72rem; text-transform: uppercase; color: #6b7f90; letter-spacing: .04em; }
 .step-detail pre { background: #0f1e2a; color: #e3edf5; padding: 10px; border-radius: 6px; font-size: 0.75rem; white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow: auto; }
 .plan .badge { margin: 2px 4px 2px 0; }
+
+/* Department routing + definitions */
+.routing { margin: 8px 0; }
+.routing .badge { margin: 2px 4px 2px 0; }
+.callout { border-left: 4px solid #d9a400; background: #fff8e1; padding: 8px 12px; border-radius: 6px; margin: 6px 0; }
+.callout p { margin: 4px 0; }
+.definitions { margin-top: 14px; }
+.definitions summary { cursor: pointer; font-weight: 600; }
+.definitions th { width: 110px; vertical-align: top; }
+
+/* Long text never escapes its box */
+td, th, p, li, .badge, .detail-box, .step-box { overflow-wrap: anywhere; }
+.badge { white-space: normal; max-width: 100%; }
+.card, .detail, .drawer { min-width: 0; }
+.split > * { min-width: 0; }
+.step-detail table { table-layout: auto; width: 100%; }

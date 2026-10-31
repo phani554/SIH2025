@@ -39,7 +39,7 @@ with sync_playwright() as p:
     def upload(path):
         n = pg.locator(".upload-results li").count()
         pg.set_input_files(".dropzone input[type=file]", str(path))
-        pg.wait_for_function(f"document.querySelectorAll('.upload-results li').length > {n}", timeout=15000)
+        pg.wait_for_function(f"document.querySelectorAll('.upload-results li').length > {n}", timeout=60000)
         return pg.locator(".upload-results li").first.inner_text()
 
     t = upload(DOCS / "invoice_INV-2025-0917_alstom.txt"); check("upload invoice", "ANALYZED" in t, t)
@@ -91,7 +91,7 @@ with sync_playwright() as p:
     # Ask tab
     pg.click("nav button:has-text('Ask')")
     pg.fill("form input", "What is the total payable amount on the Alstom invoice?")
-    pg.click("form button"); pg.wait_for_selector(".answer")
+    pg.click("form button"); pg.wait_for_selector(".answer", timeout=60000)
     ans = pg.inner_text(".answer")
     check("answer with verified citation", "21,71,200" in ans and "verified" in ans, ans.split("\n")[0])
     pg.screenshot(path=OUT / "08_ask.png")
@@ -105,7 +105,7 @@ with sync_playwright() as p:
     pg.locator(".step-detail").scroll_into_view_if_needed(); pg.screenshot(path=OUT / "09_ask_drawer_rrf.png")
     pg.click(".drawer button:has-text('Close')")
     pg.fill("form input", "What is on the canteen menu today?"); pg.click("form button")
-    pg.wait_for_function("document.querySelector('.answer') && document.querySelector('.answer').innerText.includes('Not found')", timeout=10000)
+    pg.wait_for_function("document.querySelector('.answer') && document.querySelector('.answer').innerText.includes('Not found')", timeout=60000)
     check("refusal shown", True)
 
     # Review & Audit

@@ -39,14 +39,20 @@ def add_chunks(conn, doc_id: int, chunks, vectors) -> None:
          for c, v in zip(chunks, vectors)])
 
 
-def save_analysis(conn, doc_id: int, level1, level2, status: str, reasons: list[str]) -> None:
+def save_analysis(conn, doc_id: int, level1, level2, status: str, reasons: list[str],
+                  routing: dict | None = None) -> None:
+    # Prefer the measured probability from the Decisions API over the number Level 1 wrote itself.
+    confidence = None
+    if level1:
+        measured = routing.get("decisions_probability") if routing else None
+        confidence = measured if measured is not None else level1.primary.confidence
     conn.execute(
         """UPDATE documents SET doc_type = ?, summary = ?, urgency = ?, confidence = ?, status = ?,
-               review_reasons = ?, l1_json = ?, l2_json = ? WHERE doc_id = ?""",
+               review_reasons = ?, l1_json = ?, l2_json = ?, routing_json = ? WHERE doc_id = ?""",
         (level1.doc_type if level1 else None, level1.summary if level1 else None,
-         level1.urgency if level1 else None, level1.primary.confidence if level1 else None,
+         level1.urgency if level1 else None, confidence,
          status, json.dumps(reasons), level1.model_dump_json() if level1 else None,
-         level2.model_dump_json() if level2 else None, doc_id))
+         level2.model_dump_json() if level2 else None, json.dumps(routing) if routing else None, doc_id))
     if level1:
         set_departments(conn, doc_id, [(d.name, d.confidence) for d in level1.departments])
 

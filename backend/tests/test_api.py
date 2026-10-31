@@ -45,8 +45,9 @@ def test_clean_invoice_full_trace(demo_docs, keys):
     trace = run(res["run_id"], keys["admin"])
     names = [s["name"] for s in trace["steps"]]
     assert names == ["auth", "plan_run", "upload_validation", "sha256_dedupe", "save_original", "extract_text",
-                     "pii_redaction", "injection_scan", "chunking", "embed_chunks", "index_chunks",
-                     "level1_classification (attempt 1)", "level2_extraction (attempt 1)",
+                     "pii_redaction", "injection_scan", "chunking", "chunk_department_signals",
+                     "embed_chunks", "index_chunks", "level1_classification (attempt 1)",
+                     "department_decision", "level2_extraction (attempt 1)", "department_routing",
                      "review_gate", "create_action_items", "save_results"]
     layers = {s["name"]: s["layer"] for s in trace["steps"]}
     assert (layers["upload_validation"], layers["sha256_dedupe"], layers["embed_chunks"], layers["review_gate"]) == \

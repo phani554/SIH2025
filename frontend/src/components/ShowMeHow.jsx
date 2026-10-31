@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
+import Routing from './Routing';
 
 // "Show me how": the trace of one run (an upload or a question), step by step.
 // Top: the preliminary analysis (Level 1 + run plan). Below: one lane per layer, each step drawn
@@ -85,6 +86,7 @@ function Preliminary({ kind, plan, steps }) {
           </p>
           <p><strong>L1 summary:</strong> {l1.summary}</p>
           <p className="muted small">Why: {l1.reasoning}</p>
+          {plan.routing && <Routing routing={plan.routing} />}
         </>
       ) : <p className="muted">Level 1 did not run or did not pass validation.</p>}
       <h3>Run plan</h3>
@@ -94,6 +96,13 @@ function Preliminary({ kind, plan, steps }) {
         {plan.plan.mode && <> · mode {plan.plan.mode}, HyDE {plan.plan.hyde ? 'on' : 'off'}, top {plan.plan.top_k}</>}
         {plan.used && <> · used: {plan.used.steps_run} steps, {plan.used.llm_calls} LLM calls</>}
       </p>
+      {plan.cost && (
+        <p className="small">
+          Tokens <strong>{plan.cost.input_tokens.toLocaleString()}</strong> in ·{' '}
+          <strong>{plan.cost.output_tokens.toLocaleString()}</strong> out · estimated cost{' '}
+          <strong>${plan.cost.usd_estimate.toFixed(5)}</strong>
+        </p>
+      )}
       <p className="plan">
         {plan.plan.steps.map((name, i) => (
           <span key={name} className={`badge ${ran.has(name) ? 'green' : 'grey'}`}>{i + 1}. {name}</span>

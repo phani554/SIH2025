@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS documents (
     doc_id       INTEGER PRIMARY KEY,
     sha256       TEXT NOT NULL UNIQUE,
     file_name    TEXT NOT NULL,
-    source       TEXT NOT NULL,              -- upload / gmail
+    source       TEXT NOT NULL,              -- upload:<who uploaded it>
     saved_path   TEXT,
     doc_type     TEXT,
     summary      TEXT,
@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS documents (
     l1_json      TEXT,                       -- Level 1: departments, urgency, summary (validated)
     l2_json      TEXT,                       -- Level 2: dates, amounts, regulation ids, vendors, actions
     review_reasons TEXT,                     -- why the gate sent it to review (JSON list)
+    routing_json TEXT,                       -- department routing: chunk signals vs Level 1 vs Decisions API
     created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status, created_at);
@@ -156,6 +157,9 @@ def get_conn(path: str | None = None):
 def init_db(path: str | None = None) -> None:
     with get_conn(path) as conn:
         conn.executescript(SCHEMA)
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(documents)")}
+        if "routing_json" not in cols:            # databases created before routing existed
+            conn.execute("ALTER TABLE documents ADD COLUMN routing_json TEXT")
         conn.executemany(
             "INSERT OR IGNORE INTO departments(name) VALUES (?)",
             [(d,) for d in DEPARTMENTS],

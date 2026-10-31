@@ -23,8 +23,16 @@ class Settings:
     upload_dir: str = os.getenv("UPLOAD_DIR", "uploads")
     chunk_size_words: int = int(os.getenv("CHUNK_SIZE_WORDS", "200"))
     chunk_overlap_words: int = int(os.getenv("CHUNK_OVERLAP_WORDS", "40"))
+    chunk_strategy: str = os.getenv("CHUNK_STRATEGY", "recursive")   # fixed | recursive | sentence
+    use_hyde: bool = os.getenv("USE_HYDE", "true").lower() == "true"
     review_threshold: float = float(os.getenv("REVIEW_CONFIDENCE_THRESHOLD", "0.6"))
     frontend_origin: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+
+    # Security
+    auth_enabled: bool = os.getenv("AUTH_ENABLED", "true").lower() == "true"
+    redact_pii: bool = os.getenv("REDACT_PII", "true").lower() == "true"
+    rate_limit_per_minute: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "30"))
+    max_upload_mb: int = int(os.getenv("MAX_UPLOAD_MB", "15"))
 
     gmail_client_id: str = os.getenv("GCLIENT_ID", "")
     gmail_client_secret: str = os.getenv("GCLIENT_SECRET", "")

@@ -34,3 +34,8 @@ tr.clickable:hover { background: #f5f9fc; }
 .review-item { padding: 8px 0; border-bottom: 1px solid #eef2f6; }
 .detail p { line-height: 1.5; }
 @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+.options { justify-content: flex-start; gap: 20px; margin-top: 10px; font-size: 0.9rem; }
+.options input { flex: none; }
+input.key { width: 260px; flex: none; }
+button.link { background: none; color: #0b5f8f; padding: 0; text-decoration: underline; }
+.chunk { font-size: 0.85rem; margin: 4px 0; }

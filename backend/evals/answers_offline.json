@@ -1,0 +1,1682 @@
+{
+  "fixed/keyword": [
+    {
+      "id": "q01",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Amount: Rs. 18,40,000 GST @18%: Rs. 3,31,200 Total payable: Rs. 21,71,200 Payment terms: 30 days from date of invoice. [1]"
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "SAFETY CIRCULAR No. SC/14/2025 Date: 3 September 2025 Issued by: Chief Safety Officer, KMRL Subject: Immediate inspection of platform screen door sensors at Eda"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "MONTHLY MAINTENANCE REPORT: MUTTOM DEPOT Period: September 2025 Prepared by: Depot Maintenance Engineer, Rolling Stock Preventive maintenance: 25 trainsets comp"
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "NOTICE INVITING TENDER Tender No: KMRL/PROC/2025/T-219 Date of issue: 15 September 2025 Subject: Supply, installation and commissioning of IP CCTV cameras and v"
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [1]"
+    },
+    {
+      "id": "q14",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. 8,40,000. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. 2,10,000 to Rs. 2,28,000 with effect from 1 October 2025, to reflect the revis"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [1]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "fixed/vector": [
+    {
+      "id": "q01",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Amount: Rs. 18,40,000 GST @18%: Rs. 3,31,200 Total payable: Rs. 21,71,200 Payment terms: 30 days from date of invoice. [5]"
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "SAFETY CIRCULAR No. SC/14/2025 Date: 3 September 2025 Issued by: Chief Safety Officer, KMRL Subject: Immediate inspection of platform screen door sensors at Eda"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "MONTHLY MAINTENANCE REPORT: MUTTOM DEPOT Period: September 2025 Prepared by: Depot Maintenance Engineer, Rolling Stock Preventive maintenance: 25 trainsets comp"
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "NOTICE INVITING TENDER Tender No: KMRL/PROC/2025/T-219 Date of issue: 15 September 2025 Subject: Supply, installation and commissioning of IP CCTV cameras and v"
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [4]"
+    },
+    {
+      "id": "q14",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. 8,40,000. [2]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. 2,10,000 to Rs. 2,28,000 with effect from 1 October 2025, to reflect the revis"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [4]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "fixed/hybrid": [
+    {
+      "id": "q01",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Amount: Rs. 18,40,000 GST @18%: Rs. 3,31,200 Total payable: Rs. 21,71,200 Payment terms: 30 days from date of invoice. [2]"
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "SAFETY CIRCULAR No. SC/14/2025 Date: 3 September 2025 Issued by: Chief Safety Officer, KMRL Subject: Immediate inspection of platform screen door sensors at Eda"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "MONTHLY MAINTENANCE REPORT: MUTTOM DEPOT Period: September 2025 Prepared by: Depot Maintenance Engineer, Rolling Stock Preventive maintenance: 25 trainsets comp"
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "NOTICE INVITING TENDER Tender No: KMRL/PROC/2025/T-219 Date of issue: 15 September 2025 Subject: Supply, installation and commissioning of IP CCTV cameras and v"
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [2]"
+    },
+    {
+      "id": "q14",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. 8,40,000. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. 2,10,000 to Rs. 2,28,000 with effect from 1 October 2025, to reflect the revis"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [2]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "fixed/hybrid+hyde": [
+    {
+      "id": "q01",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Amount: Rs. 18,40,000 GST @18%: Rs. 3,31,200 Total payable: Rs. 21,71,200 Payment terms: 30 days from date of invoice. [2]"
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "SAFETY CIRCULAR No. SC/14/2025 Date: 3 September 2025 Issued by: Chief Safety Officer, KMRL Subject: Immediate inspection of platform screen door sensors at Eda"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "MONTHLY MAINTENANCE REPORT: MUTTOM DEPOT Period: September 2025 Prepared by: Depot Maintenance Engineer, Rolling Stock Preventive maintenance: 25 trainsets comp"
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "NOTICE INVITING TENDER Tender No: KMRL/PROC/2025/T-219 Date of issue: 15 September 2025 Subject: Supply, installation and commissioning of IP CCTV cameras and v"
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [2]"
+    },
+    {
+      "id": "q14",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. 8,40,000. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. 2,10,000 to Rs. 2,28,000 with effect from 1 October 2025, to reflect the revis"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [2]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "recursive/keyword": [
+    {
+      "id": "q01",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Invoice No: INV-2025-0917 [1]"
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Description: Supply of spare bogie suspension kits for Metropolis trainsets (Qty 24) under Purchase Order PO/KMRL/RS/2025/112. [1]"
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Subject: Immediate inspection of platform screen door sensors at Edappally and Palarivattom stations [1]"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Subject: Mandatory customer service and Malayalam signage training for station staff [1]"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Subject: Mandatory customer service and Malayalam signage training for station staff [1]"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [1]"
+    },
+    {
+      "id": "q14",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. 8,40,000. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. 2,10,000 to Rs. 2,28,000 with effect from 1 October 2025, to reflect the revis"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [1]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "recursive/vector": [
+    {
+      "id": "q01",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Invoice No: INV-2025-0917 [1]"
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Description: Supply of spare bogie suspension kits for Metropolis trainsets (Qty 24) under Purchase Order PO/KMRL/RS/2025/112. [3]"
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Subject: Immediate inspection of platform screen door sensors at Edappally and Palarivattom stations [1]"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Subject: Mandatory customer service and Malayalam signage training for station staff [1]"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Subject: Mandatory customer service and Malayalam signage training for station staff [4]"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [4]"
+    },
+    {
+      "id": "q14",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. 8,40,000. [2]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. 2,10,000 to Rs. 2,28,000 with effect from 1 October 2025, to reflect the revis"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [4]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "recursive/hybrid": [
+    {
+      "id": "q01",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Invoice No: INV-2025-0917 [1]"
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Description: Supply of spare bogie suspension kits for Metropolis trainsets (Qty 24) under Purchase Order PO/KMRL/RS/2025/112. [1]"
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Subject: Immediate inspection of platform screen door sensors at Edappally and Palarivattom stations [1]"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Subject: Mandatory customer service and Malayalam signage training for station staff [1]"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Subject: Mandatory customer service and Malayalam signage training for station staff [2]"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [2]"
+    },
+    {
+      "id": "q14",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. 8,40,000. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. 2,10,000 to Rs. 2,28,000 with effect from 1 October 2025, to reflect the revis"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [2]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "recursive/hybrid+hyde": [
+    {
+      "id": "q01",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Invoice No: INV-2025-0917 [1]"
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Description: Supply of spare bogie suspension kits for Metropolis trainsets (Qty 24) under Purchase Order PO/KMRL/RS/2025/112. [1]"
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Subject: Immediate inspection of platform screen door sensors at Edappally and Palarivattom stations [1]"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Subject: Mandatory customer service and Malayalam signage training for station staff [1]"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Subject: Mandatory customer service and Malayalam signage training for station staff [2]"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [2]"
+    },
+    {
+      "id": "q14",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. 8,40,000. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. 2,10,000 to Rs. 2,28,000 with effect from 1 October 2025, to reflect the revis"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [2]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "sentence/keyword": [
+    {
+      "id": "q01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Amount: Rs. 18,40,000 GST @18%: Rs. 3,31,200 Total payable: Rs. [1]"
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "SAFETY CIRCULAR No. SC/14/2025 Date: 3 September 2025 Issued by: Chief Safety Officer, KMRL Subject: Immediate inspection of platform screen door sensors at Eda"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [2]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "MONTHLY MAINTENANCE REPORT: MUTTOM DEPOT Period: September 2025 Prepared by: Depot Maintenance Engineer, Rolling Stock Preventive maintenance: 25 trainsets comp"
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "NOTICE INVITING TENDER Tender No: KMRL/PROC/2025/T-219 Date of issue: 15 September 2025 Subject: Supply, installation and commissioning of IP CCTV cameras and v"
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [2]"
+    },
+    {
+      "id": "q14",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. [1]"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [1]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "sentence/vector": [
+    {
+      "id": "q01",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q02",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Payment due by 12 October 2025. [3]"
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "SAFETY CIRCULAR No. SC/14/2025 Date: 3 September 2025 Issued by: Chief Safety Officer, KMRL Subject: Immediate inspection of platform screen door sensors at Eda"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [2]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "MONTHLY MAINTENANCE REPORT: MUTTOM DEPOT Period: September 2025 Prepared by: Depot Maintenance Engineer, Rolling Stock Preventive maintenance: 25 trainsets comp"
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q13",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q14",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. [3]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. [1]"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "sentence/hybrid": [
+    {
+      "id": "q01",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "18,40,000 GST @18%: Rs. 3,31,200 Total payable: Rs. 21,71,200 Payment terms: 30 days from date of invoice. [5]"
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "SAFETY CIRCULAR No. SC/14/2025 Date: 3 September 2025 Issued by: Chief Safety Officer, KMRL Subject: Immediate inspection of platform screen door sensors at Eda"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [2]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "MONTHLY MAINTENANCE REPORT: MUTTOM DEPOT Period: September 2025 Prepared by: Depot Maintenance Engineer, Rolling Stock Preventive maintenance: 25 trainsets comp"
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "NOTICE INVITING TENDER Tender No: KMRL/PROC/2025/T-219 Date of issue: 15 September 2025 Subject: Supply, installation and commissioning of IP CCTV cameras and v"
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [4]"
+    },
+    {
+      "id": "q14",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. [1]"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [5]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ],
+  "sentence/hybrid+hyde": [
+    {
+      "id": "q01",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "18,40,000 GST @18%: Rs. 3,31,200 Total payable: Rs. 21,71,200 Payment terms: 30 days from date of invoice. [5]"
+    },
+    {
+      "id": "q02",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q03",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "TAX INVOICE Invoice No: INV-2025-0917 Date: 12 September 2025 From: Alstom Transport India Ltd, Bengaluru To: Kochi Metro Rail Limited, Finance Department, JLN "
+    },
+    {
+      "id": "q04",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "SAFETY CIRCULAR No. SC/14/2025 Date: 3 September 2025 Issued by: Chief Safety Officer, KMRL Subject: Immediate inspection of platform screen door sensors at Eda"
+    },
+    {
+      "id": "q05",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [1]"
+    },
+    {
+      "id": "q06",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Station controllers at Edappally and Palarivattom to test every door obstruction sensor and log results by 5 September 2025. [2]"
+    },
+    {
+      "id": "q07",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "MONTHLY MAINTENANCE REPORT: MUTTOM DEPOT Period: September 2025 Prepared by: Depot Maintenance Engineer, Rolling Stock Preventive maintenance: 25 trainsets comp"
+    },
+    {
+      "id": "q08",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Corrective maintenance: Trainset TS-07 had a traction converter fault on 18 September; the unit was replaced and the train returned to service on 20 September. "
+    },
+    {
+      "id": "q09",
+      "ok": false,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "q10",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q11",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "HR NOTICE No. HR/2025/88 Date: 22 September 2025 Subject: Mandatory customer service and Malayalam signage training for station staff All customer relations sta"
+    },
+    {
+      "id": "q12",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "NOTICE INVITING TENDER Tender No: KMRL/PROC/2025/T-219 Date of issue: 15 September 2025 Subject: Supply, installation and commissioning of IP CCTV cameras and v"
+    },
+    {
+      "id": "q13",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Last date for bid submission: 10 October 2025, 3:00 PM. [4]"
+    },
+    {
+      "id": "q14",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Earnest Money Deposit: Rs. [1]"
+    },
+    {
+      "id": "q15",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 1: The speed restriction of 25 km/h on the curve near Petta shall remain until the rail lubrication system is commissioned. [1]"
+    },
+    {
+      "id": "q16",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 2: Fire detection and suppression systems at SN Junction station shall be tested in the presence of the fire department and a compliance report submit"
+    },
+    {
+      "id": "q17",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Condition 3: Emergency evacuation walkways along the viaduct shall be inspected every month for the first six months of operation. [1]"
+    },
+    {
+      "id": "q18",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Clause 7.1 (Rates) is amended: the monthly charge per station is revised from Rs. [1]"
+    },
+    {
+      "id": "q19",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 4.2 (Contract period) is amended: the contract is extended by twelve months, to 31 March 2027. [1]"
+    },
+    {
+      "id": "q20",
+      "ok": true,
+      "faithfulness": 1.0,
+      "answer": "Clause 11 (Penalties) is amended: a penalty of Rs. 5,000 per instance applies if a station toilet is found unclean during a surprise inspection. [1]"
+    },
+    {
+      "id": "u01",
+      "ok": false,
+      "faithfulness": 1.0,
+      "answer": "Pre-bid meeting: 25 September 2025 at KMRL head office. [5]"
+    },
+    {
+      "id": "u02",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    },
+    {
+      "id": "u03",
+      "ok": true,
+      "faithfulness": 0.0,
+      "answer": "Not found in the documents."
+    }
+  ]
+}

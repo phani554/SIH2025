@@ -1,6 +1,7 @@
 """The ingestion pipeline. Every source (upload, Gmail) goes through ingest_file().
 
-    bytes -> SHA-256 dedupe -> save file -> extract pages -> chunk
+    bytes -> SHA-256 dedupe -> save file -> extract pages -> redact PII
+          -> prompt-injection scan -> chunk (strategy from .env)
           -> embed chunks -> store chunks (+ FTS index via trigger)
           -> LLM analysis -> validated JSON -> departments, action items
           -> status ANALYZED or NEEDS_REVIEW -> audit log
@@ -14,9 +15,10 @@ import numpy as np
 
 from ..config import settings
 from ..db import audit
+from ..security import looks_like_injection, redact_pii
 from .analysis import analyze_document
 from .chunking import chunk_pages
-from .extraction import extract_pages
+from .extraction import Page, extract_pages
 from .llm import LLMError
 
 
@@ -35,7 +37,8 @@ def safe_file_name(name: str) -> str:
     return os.path.basename(name).replace("..", "_") or "file"
 
 
-def ingest_file(conn, llm, file_name: str, data: bytes, source: str = "upload") -> IngestResult:
+def ingest_file(conn, llm, file_name: str, data: bytes, source: str = "upload",
+                strategy: str | None = None, upload_dir: str | None = None) -> IngestResult:
     file_name = safe_file_name(file_name)
     digest = sha256_bytes(data)
 
@@ -46,8 +49,9 @@ def ingest_file(conn, llm, file_name: str, data: bytes, source: str = "upload") 
         return IngestResult(existing["doc_id"], duplicate=True, status=existing["status"])
 
     # 2. Keep the original file: every answer can be traced back to it.
-    os.makedirs(settings.upload_dir, exist_ok=True)
-    saved_path = os.path.join(settings.upload_dir, f"{digest[:12]}_{file_name}")
+    folder = upload_dir or settings.upload_dir
+    os.makedirs(folder, exist_ok=True)
+    saved_path = os.path.join(folder, f"{digest[:12]}_{file_name}")
     with open(saved_path, "wb") as f:
         f.write(data)
 
@@ -58,32 +62,53 @@ def ingest_file(conn, llm, file_name: str, data: bytes, source: str = "upload") 
     doc_id = cur.lastrowid
     audit(conn, "INGEST", f"{source}: {file_name}", doc_id)
 
-    # 3. Extract + chunk + embed + index.
+    # 3. Extract, then redact PII so it never reaches the LLM or the search index.
     pages = extract_pages(file_name, data)
+    if settings.redact_pii:
+        pages, found = _redact_pages(pages)
+        if found:
+            audit(conn, "REDACT", json.dumps(found), doc_id)
     full_text = "\n".join(p.text for p in pages)
     if not full_text.strip():
         _set_status(conn, doc_id, "NEEDS_REVIEW")
         audit(conn, "ANALYZE", "no text extracted (scanned?)", doc_id)
         return IngestResult(doc_id, duplicate=False, status="NEEDS_REVIEW")
 
-    chunks = chunk_pages(pages, settings.chunk_size_words, settings.chunk_overlap_words)
+    # 4. Chunk + embed + index. Chunks that try to instruct the LLM are flagged.
+    chunks = chunk_pages(pages, settings.chunk_size_words, settings.chunk_overlap_words,
+                         strategy or settings.chunk_strategy)
     vectors = llm.embed([c.text for c in chunks], task="document")
+    flags = [looks_like_injection(c.text) for c in chunks]
     conn.executemany(
-        "INSERT INTO chunks(doc_id, chunk_no, page, text, embedding) VALUES (?, ?, ?, ?, ?)",
-        [(doc_id, c.chunk_no, c.page, c.text, v.astype(np.float32).tobytes())
-         for c, v in zip(chunks, vectors)],
+        "INSERT INTO chunks(doc_id, chunk_no, page, text, embedding, flagged) VALUES (?, ?, ?, ?, ?, ?)",
+        [(doc_id, c.chunk_no, c.page, c.text, v.astype(np.float32).tobytes(), int(f))
+         for c, v, f in zip(chunks, vectors, flags)],
     )
+    if any(flags):
+        audit(conn, "INJECTION_FLAG", f"{sum(flags)} chunk(s) flagged", doc_id)
 
-    # 4. Understand: one validated LLM call.
+    # 5. Understand: one validated LLM call (flagged chunks left out).
+    safe_text = "\n".join(c.text for c, f in zip(chunks, flags) if not f) if any(flags) else full_text
     try:
-        analysis = analyze_document(llm, file_name, full_text)
+        analysis = analyze_document(llm, file_name, safe_text)
     except LLMError as exc:
         _set_status(conn, doc_id, "NEEDS_REVIEW")
         audit(conn, "ANALYZE", f"failed: {exc}", doc_id)
         return IngestResult(doc_id, duplicate=False, status="NEEDS_REVIEW")
 
-    save_analysis(conn, doc_id, analysis)
-    return IngestResult(doc_id, duplicate=False, status=_status_for(analysis))
+    save_analysis(conn, doc_id, analysis, force_review=any(flags))
+    return IngestResult(doc_id, duplicate=False,
+                        status="NEEDS_REVIEW" if any(flags) else _status_for(analysis))
+
+
+def _redact_pages(pages: list[Page]) -> tuple[list[Page], dict[str, int]]:
+    clean, totals = [], {}
+    for page in pages:
+        text, counts = redact_pii(page.text)
+        clean.append(Page(page.number, text))
+        for label, n in counts.items():
+            totals[label] = totals.get(label, 0) + n
+    return clean, totals
 
 
 def _status_for(analysis) -> str:
@@ -97,8 +122,8 @@ def _set_status(conn, doc_id: int, status: str) -> None:
     conn.execute("UPDATE documents SET status = ? WHERE doc_id = ?", (status, doc_id))
 
 
-def save_analysis(conn, doc_id: int, analysis) -> None:
-    status = _status_for(analysis)
+def save_analysis(conn, doc_id: int, analysis, force_review: bool = False) -> None:
+    status = "NEEDS_REVIEW" if force_review else _status_for(analysis)
     conn.execute(
         """UPDATE documents SET doc_type = ?, summary = ?, urgency = ?, confidence = ?,
                status = ?, analysis_json = ? WHERE doc_id = ?""",

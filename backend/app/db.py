@@ -8,6 +8,7 @@ Tables
   document_departments  junction: a document can concern several departments
   action_items          tasks extracted from a document
   audit_log             who did what, when (FKs use SET NULL so history survives deletes)
+  api_keys              hashed API keys with a role and (for viewers) a department
   gmail_accounts        OAuth refresh tokens for Gmail ingestion
 """
 import sqlite3
@@ -39,6 +40,7 @@ CREATE TABLE IF NOT EXISTS chunks (
     page       INTEGER,
     text       TEXT NOT NULL,
     embedding  BLOB,                          -- float32 vector; pgvector column in production
+    flagged    INTEGER NOT NULL DEFAULT 0,    -- 1 = looks like prompt injection, never sent to the LLM
     UNIQUE (doc_id, chunk_no)
 );
 
@@ -83,6 +85,16 @@ CREATE TABLE IF NOT EXISTS audit_log (
     at       TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_audit_time ON audit_log(at);
+
+CREATE TABLE IF NOT EXISTS api_keys (
+    key_id     INTEGER PRIMARY KEY,
+    key_hash   TEXT NOT NULL UNIQUE,          -- SHA-256 of the key; the key itself is never stored
+    name       TEXT NOT NULL,
+    role       TEXT NOT NULL CHECK (role IN ('admin', 'reviewer', 'viewer')),
+    department TEXT,                          -- viewers are limited to this department
+    active     INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
 CREATE TABLE IF NOT EXISTS gmail_accounts (
     email         TEXT PRIMARY KEY,

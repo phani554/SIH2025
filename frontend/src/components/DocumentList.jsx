@@ -46,9 +46,9 @@ function DocumentDetail({ doc }) {
       <h2>{doc.file_name}</h2>
       <p className="muted">
         {doc.doc_type} · {doc.departments.map((d) => d.name).join(', ')} · confidence{' '}
-        {doc.confidence != null ? Math.round(doc.confidence * 100) + '%' : '-'} · {doc.chunk_count} chunks
+        {doc.confidence != null ? Math.round(doc.confidence * 100) + '%' : '-'} · {doc.chunks.length} chunks
       </p>
-      <a href={api.fileUrl(doc.doc_id)} target="_blank" rel="noreferrer">Open original file</a>
+      <button className="link" onClick={() => api.openFile(doc.doc_id)}>Open original file</button>
       {a ? (
         <>
           <h3>Summary</h3><p>{a.summary}</p>
@@ -64,6 +64,13 @@ function DocumentDetail({ doc }) {
           {a.deadline && <p><strong>Deadline:</strong> {a.deadline}</p>}
         </>
       ) : <p className="muted">No analysis yet. This document is waiting for human review.</p>}
+      <h3>Chunks</h3>
+      {doc.chunks.map((c) => (
+        <p key={c.chunk_no} className="chunk">
+          <span className="muted">#{c.chunk_no} p.{c.page}</span>{' '}
+          {c.flagged ? <span className="badge red">possible prompt injection, excluded</span> : null} {c.preview}…
+        </p>
+      ))}
     </section>
   );
 }

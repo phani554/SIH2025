@@ -1,0 +1,23 @@
+{"id": "q01", "question": "What is the total payable amount on the Alstom invoice?", "expected_doc": "invoice_INV-2025-0917_alstom.txt", "answer_keywords": ["21,71,200"]}
+{"id": "q02", "question": "When is the payment for invoice INV-2025-0917 due?", "expected_doc": "invoice_INV-2025-0917_alstom.txt", "answer_keywords": ["12 October 2025"]}
+{"id": "q03", "question": "Which purchase order covers the bogie suspension kits?", "expected_doc": "invoice_INV-2025-0917_alstom.txt", "answer_keywords": ["PO/KMRL/RS/2025/112"]}
+{"id": "q04", "question": "Which stations need their platform door sensors inspected?", "expected_doc": "safety_circular_SC-14_platform_screen_doors.txt", "answer_keywords": ["Edappally", "Palarivattom"]}
+{"id": "q05", "question": "By when must the door obstruction sensor test results be logged?", "expected_doc": "safety_circular_SC-14_platform_screen_doors.txt", "answer_keywords": ["5 September 2025"]}
+{"id": "q06", "question": "What happened at Edappally station on 1 September?", "expected_doc": "safety_circular_SC-14_platform_screen_doors.txt", "answer_keywords": ["door"]}
+{"id": "q07", "question": "What was the fleet availability at Muttom depot in September?", "expected_doc": "maintenance_report_muttom_depot_sept.txt", "answer_keywords": ["96.4"]}
+{"id": "q08", "question": "Which trainset had a traction converter fault?", "expected_doc": "maintenance_report_muttom_depot_sept.txt", "answer_keywords": ["TS-07"]}
+{"id": "q09", "question": "Are we running low on any spare parts at the depot?", "expected_doc": "maintenance_report_muttom_depot_sept.txt", "answer_keywords": ["brake"]}
+{"id": "q10", "question": "When does the customer service training for station staff run?", "expected_doc": "hr_notice_training_malayalam_signage.txt", "answer_keywords": ["6 October"]}
+{"id": "q11", "question": "What is the registration deadline for the signage training?", "expected_doc": "hr_notice_training_malayalam_signage.txt", "answer_keywords": ["30 September 2025"]}
+{"id": "q12", "question": "What is the estimated cost of the CCTV upgrade tender?", "expected_doc": "tender_notice_cctv_upgrade.txt", "answer_keywords": ["4.2 crore"]}
+{"id": "q13", "question": "What is the last date to submit bids for surveillance cameras?", "expected_doc": "tender_notice_cctv_upgrade.txt", "answer_keywords": ["10 October 2025"]}
+{"id": "q14", "question": "How much is the earnest money deposit for tender T-219?", "expected_doc": "tender_notice_cctv_upgrade.txt", "answer_keywords": ["8,40,000"]}
+{"id": "q15", "question": "What speed restriction applies on the curve near Petta?", "expected_doc": "cmrs_inspection_letter_vyttila_extension.txt", "answer_keywords": ["25 km/h"]}
+{"id": "q16", "question": "Within how many days is the fire system compliance report due for SN Junction?", "expected_doc": "cmrs_inspection_letter_vyttila_extension.txt", "answer_keywords": ["30 days"]}
+{"id": "q17", "question": "How often must evacuation walkways on the viaduct be checked?", "expected_doc": "cmrs_inspection_letter_vyttila_extension.txt", "answer_keywords": ["every month"]}
+{"id": "q18", "question": "What is the new monthly housekeeping charge per station?", "expected_doc": "contract_amendment_housekeeping_services.txt", "answer_keywords": ["2,28,000"]}
+{"id": "q19", "question": "Until when has the cleaning contract been extended?", "expected_doc": "contract_amendment_housekeeping_services.txt", "answer_keywords": ["31 March 2027"]}
+{"id": "q20", "question": "What is the penalty for an unclean toilet?", "expected_doc": "contract_amendment_housekeeping_services.txt", "answer_keywords": ["5,000"]}
+{"id": "u01", "question": "What is the canteen menu at the head office?", "expected_doc": null, "answer_keywords": []}
+{"id": "u02", "question": "Who won the Kerala Blasters match last week?", "expected_doc": null, "answer_keywords": []}
+{"id": "u03", "question": "What is the fare from Aluva to Thrippunithura?", "expected_doc": null, "answer_keywords": []}

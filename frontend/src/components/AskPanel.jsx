@@ -8,11 +8,13 @@ export default function AskPanel() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [useHyde, setUseHyde] = useState(true);
+  const [mode, setMode] = useState('hybrid');
 
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true); setError('');
-    try { setResult(await api.ask(question, department)); }
+    try { setResult(await api.ask(question, department, useHyde, mode)); }
     catch (err) { setError(err.message); }
     setBusy(false);
   };
@@ -29,14 +31,28 @@ export default function AskPanel() {
         </select>
         <button disabled={busy || question.length < 3}>{busy ? 'Searching…' : 'Ask'}</button>
       </form>
+      <div className="row options">
+        <label>Retrieval{' '}
+          <select value={mode} onChange={(e) => setMode(e.target.value)}>
+            <option value="hybrid">Hybrid (BM25 + vector)</option>
+            <option value="keyword">Keyword only</option>
+            <option value="vector">Vector only</option>
+          </select>
+        </label>
+        <label><input type="checkbox" checked={useHyde} onChange={(e) => setUseHyde(e.target.checked)} /> HyDE</label>
+      </div>
       {error && <p className="badge red">{error}</p>}
       {result && (
         <div className="answer">
           <p className={result.grounded ? '' : 'muted'}>{result.answer}</p>
+          {result.grounded && (
+            <p className="muted">Faithfulness: {Math.round(result.faithfulness * 100)}% of sentences backed by their source</p>
+          )}
           {result.citations.map((c) => (
             <div key={c.n} className="citation">
               <strong>[{c.n}]</strong> {c.file_name}{c.page ? `, p.${c.page}` : ''}{' '}
-              <a href={api.fileUrl(c.doc_id)} target="_blank" rel="noreferrer">open</a>
+              <span className={`badge ${c.supported ? 'green' : 'amber'}`}>{c.supported ? 'verified' : 'weak support'}</span>{' '}
+              <button className="link" onClick={() => api.openFile(c.doc_id)}>open</button>
               <p className="muted">{c.snippet}…</p>
             </div>
           ))}

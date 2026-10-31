@@ -103,6 +103,20 @@ DEPARTMENT_KEYWORDS = {
 }
 
 
+QUESTION_WORDS = {w[:5] for w in ("what", "which", "when", "where", "who", "how", "the", "and",
+                  "for", "are", "was", "does", "did", "any", "many", "much", "there", "our",
+                  "with", "from", "must", "has", "been", "need", "their")}
+
+
+# Sentence ends (but not "Rs." or "No.") or line breaks.
+SENTENCE_OR_LINE = re.compile(r"(?<!Rs\.)(?<!No\.)(?<=[.!?])\s+|\n+")
+
+
+def stems(text: str) -> set[str]:
+    """Crude stemming: first 5 letters, so 'register' matches 'registration'."""
+    return {w[:5] for w in re.findall(r"[a-z0-9]{3,}", text.lower())}
+
+
 class OfflineProvider:
     """Deterministic stand-in for the LLM. Simple on purpose: easy to explain."""
     name = "offline"
@@ -134,17 +148,23 @@ class OfflineProvider:
 
     def generate_text(self, prompt: str) -> str:
         """Extractive answer: the context sentence sharing the most words with the question."""
-        context = prompt.split("CONTEXT:", 1)[-1].split("QUESTION:", 1)[0]
+        if prompt.startswith("HYPOTHETICAL DOCUMENT"):
+            # HyDE needs a generative model; offline we simply return the question.
+            return prompt.split("QUESTION:", 1)[-1].split("PASSAGE:", 1)[0].strip()
+        context = prompt.split("<documents>", 1)[-1].split("</documents>", 1)[0]
         question = prompt.split("QUESTION:", 1)[-1].split("ANSWER:", 1)[0]
-        q_words = set(re.findall(r"[a-z0-9]{3,}", question.lower()))
-        best, best_score = None, 0
+        q_stems = stems(question) - QUESTION_WORDS
+        best, best_overlap, best_len = None, 0, 0
         for n, body in re.findall(r"\[(\d+)\] \([^)]*\)\n(.*?)(?=\n\[\d+\] \(|\Z)", context, re.S):
-            for sentence in re.split(r"(?<=[.!?])\s+", body.strip()):
-                overlap = len(q_words & set(re.findall(r"[a-z0-9]{3,}", sentence.lower())))
-                score = overlap - len(sentence) / 1000     # ties go to the shorter sentence
-                if score > best_score:
-                    best, best_score = f"{sentence.strip()} [{n}]", score
-        return best or "Not found in the documents."
+            for sentence in SENTENCE_OR_LINE.split(body.strip()):
+                overlap = len(q_stems & stems(sentence))
+                # more shared words wins; on a tie the shorter sentence wins
+                if overlap > best_overlap or (overlap == best_overlap and best and len(sentence) < best_len):
+                    best, best_overlap, best_len = f"{sentence.strip()} [{n}]", overlap, len(sentence)
+        # Refuse unless the best sentence covers at least half of the question's words.
+        if best is None or best_overlap < max(2, len(q_stems) / 2):
+            return "Not found in the documents."
+        return best
 
     def embed(self, texts: list[str], task: str = "document") -> list[np.ndarray]:
         """Feature hashing: each word adds 1 to a bucket chosen by its hash."""

@@ -6,22 +6,29 @@ from fastapi.responses import FileResponse
 
 from ..db import audit
 from ..deps import get_db, get_llm
+from ..security import User, current_user, require_role, validate_upload
 from ..services.ingestion import ingest_file
 from ..services.llm import LLMError
+from ..services.retrieval import docs_in_department
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
-MAX_UPLOAD_BYTES = 15 * 1024 * 1024
+
+def ensure_can_view(conn, user: User, doc_id: int) -> None:
+    """Viewers may only open documents tagged with their department."""
+    if user.role == "viewer" and doc_id not in docs_in_department(conn, user.department):
+        raise HTTPException(403, "Not your department")
 
 
 @router.post("")
-async def upload(file: UploadFile = File(...), conn=Depends(get_db), llm=Depends(get_llm)):
+async def upload(file: UploadFile = File(...), conn=Depends(get_db), llm=Depends(get_llm),
+                 user: User = Depends(require_role("admin", "reviewer"))):
     data = await file.read()
-    if len(data) > MAX_UPLOAD_BYTES:
-        raise HTTPException(413, "File too large (max 15 MB)")
+    name = file.filename or "upload"
+    validate_upload(name, data)
     try:
-        result = ingest_file(conn, llm, file.filename or "upload", data, source="upload")
-    except ValueError as exc:            # unsupported type, OCR missing
+        result = ingest_file(conn, llm, name, data, source=f"upload:{user.name}")
+    except ValueError as exc:            # e.g. OCR not installed
         raise HTTPException(400, str(exc)) from exc
     except LLMError as exc:              # embedding API down
         raise HTTPException(502, str(exc)) from exc
@@ -29,27 +36,33 @@ async def upload(file: UploadFile = File(...), conn=Depends(get_db), llm=Depends
 
 
 @router.get("")
-def list_documents(status: str | None = None, department: str | None = None, conn=Depends(get_db)):
-    sql = """SELECT d.doc_id, d.file_name, d.source, d.doc_type, d.urgency, d.confidence,
-                    d.status, d.created_at,
-                    (SELECT dep.name FROM document_departments dd JOIN departments dep
-                       ON dep.dept_id = dd.dept_id
-                     WHERE dd.doc_id = d.doc_id AND dd.is_primary = 1) AS department
-             FROM documents d"""
-    rows = [dict(r) for r in conn.execute(sql + " ORDER BY d.created_at DESC, d.doc_id DESC")]
+def list_documents(status: str | None = None, department: str | None = None,
+                   conn=Depends(get_db), user: User = Depends(current_user)):
+    if user.role == "viewer":
+        department = user.department
+    rows = [dict(r) for r in conn.execute(
+        """SELECT d.doc_id, d.file_name, d.source, d.doc_type, d.urgency, d.confidence,
+                  d.status, d.created_at,
+                  (SELECT dep.name FROM document_departments dd JOIN departments dep
+                     ON dep.dept_id = dd.dept_id
+                   WHERE dd.doc_id = d.doc_id AND dd.is_primary = 1) AS department
+           FROM documents d ORDER BY d.created_at DESC, d.doc_id DESC""")]
     if status:
         rows = [r for r in rows if r["status"] == status]
     if department:
-        rows = [r for r in rows if r["department"] == department]
+        allowed = docs_in_department(conn, department)
+        rows = [r for r in rows if r["doc_id"] in allowed]
     return rows
 
 
 @router.get("/{doc_id}")
-def get_document(doc_id: int, conn=Depends(get_db)):
+def get_document(doc_id: int, conn=Depends(get_db), user: User = Depends(current_user)):
     row = conn.execute("SELECT * FROM documents WHERE doc_id = ?", (doc_id,)).fetchone()
     if not row:
         raise HTTPException(404, "Document not found")
+    ensure_can_view(conn, user, doc_id)
     doc = dict(row)
+    doc.pop("saved_path")                # never expose server paths
     doc["analysis"] = json.loads(doc.pop("analysis_json") or "null")
     doc["departments"] = [dict(r) for r in conn.execute(
         """SELECT dep.name, dd.is_primary, dd.confidence FROM document_departments dd
@@ -57,26 +70,29 @@ def get_document(doc_id: int, conn=Depends(get_db)):
            ORDER BY dd.is_primary DESC""", (doc_id,))]
     doc["action_items"] = [dict(r) for r in conn.execute(
         "SELECT action, owner, priority, due FROM action_items WHERE doc_id = ?", (doc_id,))]
-    doc["chunk_count"] = conn.execute(
-        "SELECT COUNT(*) FROM chunks WHERE doc_id = ?", (doc_id,)).fetchone()[0]
-    audit(conn, "VIEW", "", doc_id, actor="user")
+    doc["chunks"] = [dict(r) for r in conn.execute(
+        "SELECT chunk_no, page, flagged, substr(text, 1, 160) AS preview FROM chunks WHERE doc_id = ?"
+        " ORDER BY chunk_no", (doc_id,))]
+    audit(conn, "VIEW", "", doc_id, actor=user.name)
     return doc
 
 
 @router.get("/{doc_id}/file")
-def download_original(doc_id: int, conn=Depends(get_db)):
+def download_original(doc_id: int, conn=Depends(get_db), user: User = Depends(current_user)):
     """Traceability: open the exact original file an answer came from."""
     row = conn.execute("SELECT file_name, saved_path FROM documents WHERE doc_id = ?", (doc_id,)).fetchone()
     if not row:
         raise HTTPException(404, "Document not found")
+    ensure_can_view(conn, user, doc_id)
+    audit(conn, "DOWNLOAD", "", doc_id, actor=user.name)
     return FileResponse(row["saved_path"], filename=row["file_name"])
 
 
 @router.delete("/{doc_id}")
-def delete_document(doc_id: int, conn=Depends(get_db)):
+def delete_document(doc_id: int, conn=Depends(get_db), user: User = Depends(require_role("admin"))):
     deleted = conn.execute("DELETE FROM documents WHERE doc_id = ?", (doc_id,)).rowcount
     if not deleted:
         raise HTTPException(404, "Document not found")
     # chunks, departments and action items CASCADE; audit rows keep doc_id = NULL
-    audit(conn, "DELETE", f"doc {doc_id}", actor="user")
+    audit(conn, "DELETE", f"doc {doc_id}", actor=user.name)
     return {"deleted": doc_id}

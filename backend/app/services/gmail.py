@@ -18,8 +18,9 @@ SCOPES = "openid https://www.googleapis.com/auth/userinfo.email https://www.goog
 SUPPORTED = (".pdf", ".txt", ".md", ".png", ".jpg", ".jpeg")
 
 
-def auth_url() -> str:
+def auth_url(state: str) -> str:
     params = {
+        "state": state,
         "client_id": settings.gmail_client_id,
         "redirect_uri": settings.gmail_redirect_uri,
         "response_type": "code",

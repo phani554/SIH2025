@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from './api';
+import { api, getKey, setKey } from './api';
 import UploadPanel from './components/UploadPanel';
 import DocumentList from './components/DocumentList';
 import AskPanel from './components/AskPanel';
@@ -12,6 +12,7 @@ export default function App() {
   const [tab, setTab] = useState('Upload');
   const [refreshKey, setRefreshKey] = useState(0);
   const [provider, setProvider] = useState('…');
+  const [key, setKeyInput] = useState(getKey());
   const refresh = () => setRefreshKey((k) => k + 1);
 
   useEffect(() => {
@@ -22,7 +23,12 @@ export default function App() {
     <div className="app">
       <header>
         <h1>MetroMind <span className="muted">· KMRL Document Intelligence</span></h1>
-        <span className="badge">LLM: {provider}</span>
+        <div className="row">
+          <input type="password" className="key" placeholder="API key" value={key}
+            onChange={(e) => { setKeyInput(e.target.value); setKey(e.target.value); }}
+            onBlur={refresh} />
+          <span className="badge">LLM: {provider}</span>
+        </div>
       </header>
       <nav>
         {TABS.map((t) => (

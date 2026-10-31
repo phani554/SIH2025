@@ -15,6 +15,7 @@ SAMPLES = Path(__file__).resolve().parents[1] / "sample_docs"
 INVOICE = "invoice_INV-2025-0917_alstom.txt"
 SAFETY = "safety_circular_SC-14_platform_screen_doors.txt"
 UNCLEAN = "unclean_vendor_letter_injection_pii.txt"
+WORK_ORDER = "work_order_WO-RS-2025-0412_bogie_overhaul.txt"
 
 
 def main():
@@ -48,8 +49,18 @@ def main():
 
     inv = run(res[INVOICE]["run_id"]).json()
     check("invoice trace: preliminary analysis + plan",
-          inv["plan"]["level1"]["departments"][0]["name"] == "Finance" and inv["plan"]["plan"]["max_steps"] == 18,
+          inv["plan"]["level1"]["departments"][0]["name"] == "Finance" and inv["plan"]["plan"]["max_steps"] == 21,
           f"{len(inv['steps'])} steps, {inv['plan']['used']['llm_calls']} LLM calls")
+
+    wo = up(WORK_ORDER, (SAMPLES / WORK_ORDER).read_bytes()).json()
+    routing = run(wo["run_id"]).json()["plan"].get("routing") or {}
+    check("work order: chunk says Finance, document routed to Maintenance",
+          routing.get("final_department") == "Maintenance" and not routing.get("agrees_with_chunks", True),
+          routing.get("headline", ""))
+    check("work order: Decisions API agrees (or offline)", wo["status"] == "ANALYZED", routing.get("decisions_check", ""))
+    cost = inv["plan"].get("cost", {})
+    check("trace shows tokens and cost estimate", "usd_estimate" in cost,
+          f"{cost.get('input_tokens')} in / {cost.get('output_tokens')} out, ${cost.get('usd_estimate')}")
 
     trace = run(res[UNCLEAN]["run_id"]).json()
     steps = {s["name"]: s for s in trace["steps"]}

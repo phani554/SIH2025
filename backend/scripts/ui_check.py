@@ -33,7 +33,7 @@ with sync_playwright() as p:
     pg.on("pageerror", lambda e: errors.append(str(e)))
     pg.goto("http://localhost:5173"); pg.wait_for_selector("header")
     pg.fill("input.key", ADMIN); pg.locator("input.key").blur(); pg.wait_for_timeout(500)
-    check("header shows provider", "offline" in pg.inner_text("header"), pg.inner_text("header .badge"))
+    check("header shows provider", "LLM:" in pg.inner_text("header"), pg.inner_text("header .badge"))
     pg.screenshot(path=OUT / "01_upload_tab.png")
 
     def upload(path):
@@ -44,6 +44,7 @@ with sync_playwright() as p:
 
     t = upload(DOCS / "invoice_INV-2025-0917_alstom.txt"); check("upload invoice", "ANALYZED" in t, t)
     t = upload(DOCS / "safety_circular_SC-14_platform_screen_doors.txt"); check("upload circular", "ANALYZED" in t, t)
+    t = upload(DOCS / "work_order_WO-RS-2025-0412_bogie_overhaul.txt"); check("upload work order", "ANALYZED" in t, t)
     t = upload(DOCS / "unclean_vendor_letter_injection_pii.txt"); check("upload unclean", "NEEDS_REVIEW" in t, t)
     t = upload(DOCS / "invoice_INV-2025-0917_alstom.txt"); check("re-upload duplicate", "duplicate" in t, t)
     bad = OUT / "layout.dwg"; bad.write_bytes(b"AC1015")
@@ -56,9 +57,9 @@ with sync_playwright() as p:
     pg.wait_for_selector(".drawer .step-box")
     d = pg.inner_text(".drawer")
     check("drawer: preliminary analysis", "Preliminary analysis" in d and "Finance" in d)
-    check("drawer: run plan", "max steps" in d and "18" in d)
+    check("drawer: run plan + cost", "max steps" in d and "21" in d and "estimated cost" in d)
     check("drawer: 6 lanes", pg.locator(".lane-title").count() == 6)
-    check("drawer: 16 step boxes", pg.locator(".step-box").count() == 16, str(pg.locator(".step-box").count()))
+    check("drawer: 19 step boxes", pg.locator(".step-box").count() == 19, str(pg.locator(".step-box").count()))
     pg.screenshot(path=OUT / "03_drawer_unclean.png")
     pg.locator(".step-box", has_text="pii_redaction").click(); pg.wait_for_selector(".step-detail")
     sd = pg.inner_text(".step-detail")
@@ -76,9 +77,21 @@ with sync_playwright() as p:
     pg.click(".drawer button:has-text('Close')"); pg.wait_for_timeout(200)
     check("drawer closes", pg.locator(".drawer").count() == 0)
 
+    # Work order: the chunk-vs-document callout in Show me how
+    pg.locator(".upload-results li", has_text="work_order").locator("text=Show me how").click()
+    pg.wait_for_selector(".drawer .callout")
+    cl = pg.inner_text(".drawer .callout")
+    check("work order drawer: chunk looks like Finance, document is Maintenance", "Finance" in cl and "Maintenance" in cl, cl[:90])
+    pg.locator(".step-box", has_text="department_routing").click(); pg.wait_for_timeout(200)
+    check("department_routing drill-down", "disagreements" in pg.inner_text(".step-detail"))
+    pg.locator(".drawer .prelim").scroll_into_view_if_needed(); pg.screenshot(path=OUT / "05b_work_order_routing.png")
+    pg.click(".drawer button:has-text('Close')")
+
     # Documents tab
     pg.click("nav button:has-text('Documents')"); pg.wait_for_selector("tbody tr")
-    check("documents listed", pg.locator("tbody tr").count() == 3, str(pg.locator("tbody tr").count()))
+    check("documents listed", pg.locator("tbody tr").count() == 4, str(pg.locator("tbody tr").count()))
+    pg.click("summary:has-text('What each department owns')"); pg.wait_for_timeout(200)
+    check("department definitions visible", "Not:" in pg.inner_text(".definitions"))
     pg.locator("tbody tr", has_text="invoice").click(); pg.wait_for_selector(".detail h2")
     det = pg.inner_text(".detail")
     check("document detail L1 + L2", "Level 1" in det and "Rs. 21,71,200" in det, "")
@@ -127,7 +140,7 @@ with sync_playwright() as p:
     pg.fill("input.key", VIEWER); pg.locator("input.key").blur(); pg.wait_for_timeout(300)
     pg.click("nav button:has-text('Documents')"); pg.wait_for_timeout(800)
     rows = pg.inner_text("tbody") if pg.locator("tbody tr").count() else ""
-    check("viewer sees only Finance docs", "safety" not in rows and "invoice" in rows)
+    check("viewer sees only Finance docs", "safety" not in rows and "work_order" not in rows and "invoice" in rows)
     pg.click("nav button:has-text('Ask')")
     pg.fill("form input", "door sensors"); pg.select_option("form select", "Safety"); pg.click("form button")
     pg.wait_for_selector(".badge.red", timeout=8000)

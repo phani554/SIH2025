@@ -1,9 +1,9 @@
 {
   "provider": "offline",
   "model": "offline-rules-v1",
-  "generated_at": "2026-10-31T20:01:09+00:00",
-  "documents": 8,
-  "questions": 25,
+  "generated_at": "2026-10-31T20:20:00+00:00",
+  "documents": 9,
+  "questions": 27,
   "refusal_questions": 4,
   "tables": [
     {
@@ -18,7 +18,7 @@
         [
           1.0,
           1.0,
-          0.98,
+          0.96,
           1.0
         ]
       ]
@@ -35,31 +35,31 @@
       "rows": [
         [
           "dates",
-          0.95,
+          0.96,
           1.0,
-          20,
-          19
+          23,
+          22
         ],
         [
           "amounts",
           1.0,
           1.0,
-          9,
-          9
+          11,
+          11
         ],
         [
           "reference_ids",
+          0.92,
           1.0,
-          1.0,
-          10,
-          10
+          13,
+          12
         ],
         [
           "vendors",
           1.0,
           1.0,
-          3,
-          3
+          4,
+          4
         ]
       ]
     },
@@ -119,6 +119,12 @@
           "Procurement",
           "Procurement",
           "ANALYZED"
+        ],
+        [
+          "work_order_WO-RS-2025-0412_bogie_overhaul.txt",
+          "Maintenance",
+          "Maintenance",
+          "ANALYZED"
         ]
       ]
     },
@@ -139,21 +145,50 @@
         ],
         [
           "vector",
-          0.67,
-          0.95,
-          0.76
+          0.57,
+          0.74,
+          0.64
         ],
         [
           "hybrid",
-          0.81,
+          0.74,
           1.0,
-          0.89
+          0.82
         ],
         [
           "hybrid+hyde",
-          0.81,
+          0.74,
           1.0,
-          0.89
+          0.82
+        ]
+      ]
+    },
+    {
+      "title": "Answers",
+      "columns": [
+        "retrieval",
+        "answer_accuracy",
+        "refusal",
+        "pii_leaks",
+        "faithfulness",
+        "latency_s"
+      ],
+      "rows": [
+        [
+          "hybrid",
+          0.7,
+          0.75,
+          0,
+          0.96,
+          0.0
+        ],
+        [
+          "hybrid+hyde",
+          0.7,
+          0.75,
+          0,
+          0.96,
+          0.0
         ]
       ]
     }

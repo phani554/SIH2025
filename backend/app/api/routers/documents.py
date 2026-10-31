@@ -4,12 +4,11 @@ import json
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from ..db import audit
+from ...actions.audit import audit
+from ...knowledge.retrieval import docs_in_department
+from ...orchestrator.ingest_flow import RejectedWithTrace, process_upload
+from ..auth import User, current_user, require_role
 from ..deps import get_db, get_llm
-from ..security import User, current_user, require_role, validate_upload
-from ..services.ingestion import ingest_file
-from ..services.llm import LLMError
-from ..services.retrieval import docs_in_department
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -24,15 +23,13 @@ def ensure_can_view(conn, user: User, doc_id: int) -> None:
 async def upload(file: UploadFile = File(...), conn=Depends(get_db), llm=Depends(get_llm),
                  user: User = Depends(require_role("admin", "reviewer"))):
     data = await file.read()
-    name = file.filename or "upload"
-    validate_upload(name, data)
     try:
-        result = ingest_file(conn, llm, name, data, source=f"upload:{user.name}")
-    except ValueError as exc:            # e.g. OCR not installed
-        raise HTTPException(400, str(exc)) from exc
-    except LLMError as exc:              # embedding API down
-        raise HTTPException(502, str(exc)) from exc
-    return {"doc_id": result.doc_id, "duplicate": result.duplicate, "status": result.status}
+        result = process_upload(conn, llm, user, file.filename or "upload", data)
+    except RejectedWithTrace as exc:
+        conn.commit()                    # keep the trace of the rejection, then refuse
+        raise HTTPException(exc.status_code, {"message": str(exc), "run_id": exc.run_id}) from exc
+    return {"doc_id": result.doc_id, "status": result.status, "duplicate": result.duplicate,
+            "run_id": result.run_id}
 
 
 @router.get("")
@@ -63,16 +60,21 @@ def get_document(doc_id: int, conn=Depends(get_db), user: User = Depends(current
     ensure_can_view(conn, user, doc_id)
     doc = dict(row)
     doc.pop("saved_path")                # never expose server paths
-    doc["analysis"] = json.loads(doc.pop("analysis_json") or "null")
+    doc["level1"] = json.loads(doc.pop("l1_json") or "null")
+    doc["level2"] = json.loads(doc.pop("l2_json") or "null")
+    doc["review_reasons"] = json.loads(doc["review_reasons"] or "[]")
     doc["departments"] = [dict(r) for r in conn.execute(
         """SELECT dep.name, dd.is_primary, dd.confidence FROM document_departments dd
            JOIN departments dep ON dep.dept_id = dd.dept_id WHERE dd.doc_id = ?
            ORDER BY dd.is_primary DESC""", (doc_id,))]
     doc["action_items"] = [dict(r) for r in conn.execute(
-        "SELECT action, owner, priority, due FROM action_items WHERE doc_id = ?", (doc_id,))]
+        "SELECT action, owner, priority, due, confidence FROM action_items WHERE doc_id = ?", (doc_id,))]
     doc["chunks"] = [dict(r) for r in conn.execute(
-        "SELECT chunk_no, page, flagged, substr(text, 1, 160) AS preview FROM chunks WHERE doc_id = ?"
+        "SELECT chunk_no, page, substr(text, 1, 160) AS preview FROM chunks WHERE doc_id = ?"
         " ORDER BY chunk_no", (doc_id,))]
+    doc["runs"] = [dict(r) for r in conn.execute(
+        "SELECT run_id, status, started_at, duration_ms FROM runs WHERE doc_id = ? AND kind = 'ingest'"
+        " ORDER BY run_id DESC", (doc_id,))]
     audit(conn, "VIEW", "", doc_id, actor=user.name)
     return doc
 

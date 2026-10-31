@@ -4,19 +4,22 @@ import UploadPanel from './components/UploadPanel';
 import DocumentList from './components/DocumentList';
 import AskPanel from './components/AskPanel';
 import ReviewPanel from './components/ReviewPanel';
+import EvalsPanel from './components/EvalsPanel';
+import ShowMeHow from './components/ShowMeHow';
 import './App.css';
 
-const TABS = ['Upload', 'Documents', 'Ask', 'Review & Audit'];
+const TABS = ['Upload', 'Documents', 'Ask', 'Review & Audit', 'Evals'];
 
 export default function App() {
   const [tab, setTab] = useState('Upload');
   const [refreshKey, setRefreshKey] = useState(0);
   const [provider, setProvider] = useState('…');
   const [key, setKeyInput] = useState(getKey());
+  const [runId, setRunId] = useState(null);   // the run open in "Show me how"
   const refresh = () => setRefreshKey((k) => k + 1);
 
   useEffect(() => {
-    api.health().then((h) => setProvider(h.llm_provider)).catch(() => setProvider('backend offline'));
+    api.health().then((h) => setProvider(`${h.llm_provider} · ${h.model}`)).catch(() => setProvider('backend offline'));
   }, []);
 
   return (
@@ -36,11 +39,13 @@ export default function App() {
         ))}
       </nav>
       <main>
-        {tab === 'Upload' && <UploadPanel onUploaded={refresh} />}
-        {tab === 'Documents' && <DocumentList refreshKey={refreshKey} />}
-        {tab === 'Ask' && <AskPanel />}
-        {tab === 'Review & Audit' && <ReviewPanel refreshKey={refreshKey} onChange={refresh} />}
+        {tab === 'Upload' && <UploadPanel onUploaded={refresh} onShowRun={setRunId} />}
+        {tab === 'Documents' && <DocumentList refreshKey={refreshKey} onShowRun={setRunId} />}
+        {tab === 'Ask' && <AskPanel onShowRun={setRunId} />}
+        {tab === 'Review & Audit' && <ReviewPanel refreshKey={refreshKey} onChange={refresh} onShowRun={setRunId} />}
+        {tab === 'Evals' && <EvalsPanel />}
       </main>
+      {runId && <ShowMeHow runId={runId} onClose={() => setRunId(null)} />}
     </div>
   );
 }

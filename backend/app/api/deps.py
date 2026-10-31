@@ -1,8 +1,8 @@
 """FastAPI dependencies: one DB connection per request, one shared LLM provider."""
 from functools import lru_cache
 
-from .db import connect
-from .services.llm import get_provider
+from ..db import connect
+from ..llm.providers import get_provider
 
 
 def get_db():

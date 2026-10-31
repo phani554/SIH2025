@@ -24,7 +24,7 @@ SAMPLES = Path(__file__).resolve().parents[1] / "sample_docs"
 def keys():
     """One API key per role, created once for the whole test run."""
     from app.db import get_conn, init_db
-    from app.security import create_api_key
+    from app.api.auth import create_api_key
 
     init_db()
     with get_conn() as conn:

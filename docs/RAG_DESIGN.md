@@ -5,9 +5,9 @@ Every choice below is one small file and one `.env` switch, so you can change it
 ## Pipeline
 
 ```
-INGEST   file -> sha256 dedupe -> extract pages -> redact PII -> injection scan
+INGEST   file -> validate -> sha256 dedupe -> extract pages -> redact PII -> quarantine injections
               -> chunk (fixed | recursive | sentence) -> embed -> SQLite (+ FTS5)
-              -> one LLM call -> Pydantic validation -> departments, action items, status
+              -> Level 1 call -> Level 2 call (each Pydantic-validated, 1 retry) -> review gate
 
 ASK      question -> department filter (from the API key's role)
               -> keyword search (BM25)  ┐
@@ -17,7 +17,7 @@ ASK      question -> department filter (from the API key's role)
               -> answer with [n] -> citation check -> faithfulness score -> audit log
 ```
 
-## 1. Chunking strategies (`services/chunking.py`, `CHUNK_STRATEGY`)
+## 1. Chunking strategies (`ingestion/chunking.py`, `CHUNK_STRATEGY`)
 
 | Strategy | How | Good at | Weak at |
 |---|---|---|---|
@@ -29,15 +29,15 @@ Each chunk stores its page number, so citations say "file, p.3".
 Overlap matters because a sentence cut at a boundary still appears whole in the neighbouring chunk.
 Changing the strategy only affects newly ingested documents: delete `metromind.db` and re-seed.
 
-## 2. Retrieval (`services/retrieval.py`)
+## 2. Retrieval (`knowledge/retrieval.py`)
 
 - **Keyword:** SQLite FTS5 with `bm25()` ranking. Catches exact tokens: `INV-2025-0917`, `T-219`, `CMRS`.
-- **Vector:** embeddings (Gemini `gemini-embedding-001`, 768-dim, normalised) and a numpy dot product, which equals cosine similarity for normalised vectors.
+- **Vector:** embeddings (OpenAI `text-embedding-3-small`, 1536-dim, normalised; offline: 768-dim hashed bag of words) and a numpy dot product, which equals cosine similarity for normalised vectors.
 - **Hybrid:** each returns its top 20; **RRF** merges them with `score = Σ 1/(60 + rank)`. It uses ranks only, so BM25 and cosine scales never need normalising.
 - **Department filter before ranking:** a Finance viewer's query never even scores Safety chunks.
 - **Flagged chunks** (possible prompt injection) are excluded from both searches.
 
-## 3. HyDE (`query_vector()` in retrieval.py, `USE_HYDE` or `use_hyde` per request)
+## 3. HyDE (`orchestrator/ask_flow.py: search()`, `USE_HYDE` or `use_hyde` per request)
 
 Questions are short ("bid deadline for cameras?"); documents are long and formal. Their embeddings sit in different places.
 HyDE asks the LLM to write a *hypothetical* KMRL passage answering the question, then embeds **question + passage**
@@ -45,7 +45,7 @@ and searches with that. The passage is never shown and never used as an answer; 
 Keyword search still uses the real question, so HyDE can't break exact-match lookups.
 Cost: one extra LLM call per question. Turn it off for latency-sensitive use.
 
-## 4. Grounded answers and citation check (`services/rag.py`)
+## 4. Grounded answers and citation check (`llm/grounding.py`)
 
 - The prompt numbers chunks `[1]..[k]`, requires `[n]` after every sentence, and has one exact refusal:
   "Not found in the documents."
@@ -55,30 +55,32 @@ Cost: one extra LLM call per question. Turn it off for latency-sensitive use.
   Each citation in the response carries `supported: true/false`; the UI shows "verified" or "weak support".
 - No valid citation → we return the refusal instead of an ungrounded answer.
 
-## 5. Evals (`scripts/run_evals.py`, `evals/dataset.jsonl`)
+## 5. Evals (`scripts/run_evals.py`)
 
-23 questions over the 7 sample documents: 20 answerable (with the expected document and expected answer
-keywords) and 3 that must be refused.
+Inputs: `evals/labels.jsonl` (gold department, gate status and Level 2 entities for 8 documents: the 3 demo
+documents + 5 in `evals/corpus/`) and `evals/dataset.jsonl` (25 questions: 21 with an expected document and
+answer keywords, 4 that must be refused, one of which asks for a masked Aadhaar number).
 
 | Metric | Meaning |
 |---|---|
-| hit@1, hit@k | Expected document is in the top 1 / top k chunks |
-| MRR | Mean of 1/rank of the first chunk from the expected document |
-| accuracy | Answer contains every expected keyword |
-| refusal | Unanswerable questions answered "Not found in the documents." |
-| faithfulness | Average citation-check score on answerable questions |
-| latency | Seconds per question |
+| L1 accuracy | primary department == gold |
+| gate accuracy | ANALYZED / NEEDS_REVIEW == gold (demo documents) |
+| L2 precision / recall | extracted values matching a gold value / gold values that were extracted, per entity type |
+| hit@1, hit@k, MRR | the expected document's rank among retrieved chunks |
+| answer accuracy | answer contains every expected keyword |
+| refusal | unanswerable questions answered "Not found in the documents." |
+| PII leaks | answers containing a raw PII string (must be 0) |
+| faithfulness | average citation-check score |
 
 ```bash
-python -m scripts.run_evals                                   # retrieval: 3 chunkers x 4 modes
-python -m scripts.run_evals --answers --strategies recursive  # + answers (LLM calls)
+python -m scripts.run_evals              # classification + retrieval
+python -m scripts.run_evals --answers    # + answers (LLM calls)
 ```
-Writes `evals/report_<provider>.md`. `report_offline.md` is the committed baseline.
+Writes `evals/report_<provider>.md` and `evals/latest_<provider>.json` (the Evals tab shows the newest).
 
-**Reading the baseline honestly:** with 7 short documents, keyword search already finds the right document,
-so retrieval numbers are near the ceiling. The offline "LLM" is extractive, so its answer accuracy (0.60 to 0.70) is
-the floor that Gemini should beat. To make the evals discriminate, add longer, overlapping documents and
-paraphrased questions to the dataset. That's the first thing to grow.
+**Read the committed numbers honestly.** They come from the offline rules, which were written alongside
+this small labelled set, so L1/L2 scores near 1.0 prove the harness works, not that the approach generalises.
+Run it with `LLM_PROVIDER=openai` to get gpt-4o-mini numbers, and grow the labelled set before quoting any.
 
 ## Next steps (not built, on purpose)
 

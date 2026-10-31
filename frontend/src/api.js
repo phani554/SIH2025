@@ -9,7 +9,13 @@ async function request(path, options = {}) {
   const headers = { ...(options.headers || {}), 'X-API-Key': getKey() };
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.detail || `Request failed (${res.status})`);
+  if (!res.ok) {
+    // detail is a string, or {message, run_id} for a rejected upload (so we can still show its trace)
+    const detail = body.detail || {};
+    const err = new Error(detail.message || (typeof detail === 'string' ? detail : `Request failed (${res.status})`));
+    err.runId = detail.run_id;
+    throw err;
+  }
   return body;
 }
 
@@ -38,6 +44,9 @@ export const api = {
     request('/ask', json({ question, department: department || null, use_hyde: useHyde, mode })),
   review: (id, department) => request(`/documents/${id}/review`, json({ department, approve: true })),
   audit: () => request('/audit'),
+  runs: () => request('/runs'),
+  run: (id) => request(`/runs/${id}`),
+  evals: () => request('/evals/latest'),
   stats: () => request('/stats'),
 };
 

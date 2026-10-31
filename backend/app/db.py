@@ -8,8 +8,8 @@ Tables
   document_departments  junction: a document can concern several departments
   action_items          tasks extracted from a document
   audit_log             who did what, when (FKs use SET NULL so history survives deletes)
+  runs, run_steps       the trace behind "Show me how": every step of every upload and question
   api_keys              hashed API keys with a role and (for viewers) a department
-  gmail_accounts        OAuth refresh tokens for Gmail ingestion
 """
 import sqlite3
 from contextlib import contextmanager
@@ -27,8 +27,11 @@ CREATE TABLE IF NOT EXISTS documents (
     summary      TEXT,
     urgency      TEXT,
     confidence   REAL,
-    status       TEXT NOT NULL DEFAULT 'NEW', -- NEW / ANALYZED / NEEDS_REVIEW / APPROVED / FAILED
-    analysis_json TEXT,                       -- full validated LLM output
+    status       TEXT NOT NULL DEFAULT 'NEW', -- NEW / ANALYZED / NEEDS_REVIEW / APPROVED
+    language     TEXT,                       -- e.g. "English", "English + Malayalam"
+    l1_json      TEXT,                       -- Level 1: departments, urgency, summary (validated)
+    l2_json      TEXT,                       -- Level 2: dates, amounts, regulation ids, vendors, actions
+    review_reasons TEXT,                     -- why the gate sent it to review (JSON list)
     created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status, created_at);
@@ -40,7 +43,6 @@ CREATE TABLE IF NOT EXISTS chunks (
     page       INTEGER,
     text       TEXT NOT NULL,
     embedding  BLOB,                          -- float32 vector; pgvector column in production
-    flagged    INTEGER NOT NULL DEFAULT 0,    -- 1 = looks like prompt injection, never sent to the LLM
     UNIQUE (doc_id, chunk_no)
 );
 
@@ -73,7 +75,8 @@ CREATE TABLE IF NOT EXISTS action_items (
     action      TEXT NOT NULL,
     owner       TEXT,
     priority    TEXT,
-    due         TEXT
+    due         TEXT,
+    confidence  REAL
 );
 
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -86,6 +89,36 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 CREATE INDEX IF NOT EXISTS idx_audit_time ON audit_log(at);
 
+-- Tracing: one run per upload or question, one row per step it performed.
+CREATE TABLE IF NOT EXISTS runs (
+    run_id      INTEGER PRIMARY KEY,
+    kind        TEXT NOT NULL,               -- ingest / ask
+    doc_id      INTEGER REFERENCES documents(doc_id) ON DELETE SET NULL,
+    actor       TEXT,                        -- API key name
+    role        TEXT,
+    department  TEXT,
+    status      TEXT NOT NULL,               -- ANALYZED / NEEDS_REVIEW / DUPLICATE / REJECTED / ANSWERED / REFUSED
+    summary     TEXT,
+    plan_json   TEXT,                        -- preliminary analysis + run plan
+    started_at  TEXT NOT NULL,
+    duration_ms REAL
+);
+CREATE INDEX IF NOT EXISTS idx_runs_doc ON runs(doc_id);
+
+CREATE TABLE IF NOT EXISTS run_steps (
+    step_id        INTEGER PRIMARY KEY,
+    run_id         INTEGER NOT NULL REFERENCES runs(run_id) ON DELETE CASCADE,
+    seq            INTEGER NOT NULL,
+    name           TEXT NOT NULL,
+    layer          TEXT NOT NULL,             -- api / orchestrator / ingestion / knowledge / llm / actions
+    status         TEXT NOT NULL,             -- ok / retried / failed / skipped
+    started_at     TEXT,
+    duration_ms    REAL,
+    input_summary  TEXT,
+    output_summary TEXT,
+    detail_json    TEXT                       -- drill-down: prompt, raw output, scores, SQL
+);
+
 CREATE TABLE IF NOT EXISTS api_keys (
     key_id     INTEGER PRIMARY KEY,
     key_hash   TEXT NOT NULL UNIQUE,          -- SHA-256 of the key; the key itself is never stored
@@ -96,16 +129,6 @@ CREATE TABLE IF NOT EXISTS api_keys (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS gmail_accounts (
-    email         TEXT PRIMARY KEY,
-    refresh_token TEXT NOT NULL,
-    connected_at  TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS processed_messages (
-    message_id   TEXT PRIMARY KEY,
-    processed_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
 """
 
 
@@ -137,11 +160,3 @@ def init_db(path: str | None = None) -> None:
             "INSERT OR IGNORE INTO departments(name) VALUES (?)",
             [(d,) for d in DEPARTMENTS],
         )
-
-
-def audit(conn: sqlite3.Connection, action: str, detail: str = "",
-          doc_id: int | None = None, actor: str = "system") -> None:
-    conn.execute(
-        "INSERT INTO audit_log(doc_id, actor, action, detail) VALUES (?, ?, ?, ?)",
-        (doc_id, actor, action, detail),
-    )

@@ -9,10 +9,6 @@ pypdf==5.1.0
 # Optional: OCR for scanned images (needs the Tesseract binary installed)
 pytesseract==0.3.13
 Pillow==11.0.0
-# Optional: Gmail ingestion
-google-auth==2.36.0
-google-auth-oauthlib==1.2.1
-google-api-python-client==2.154.0
 # Tests
 pytest==8.3.4
 httpx==0.28.1

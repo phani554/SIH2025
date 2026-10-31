@@ -1,12 +1,12 @@
 """Human-in-the-loop review queue and the audit trail."""
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..config import DEPARTMENTS
-from ..db import audit
+from ...actions.audit import audit
+from ...config import DEPARTMENTS
+from ...knowledge.store import set_departments
+from ..auth import User, current_user, require_role
 from ..deps import get_db
-from ..schemas import ReviewDecision
-from ..security import User, current_user, require_role
-from ..services.ingestion import set_departments
+from ..models import ReviewDecision
 
 router = APIRouter(tags=["review"])
 
@@ -19,7 +19,7 @@ def review(doc_id: int, decision: ReviewDecision, conn=Depends(get_db),
     if decision.department:
         if decision.department not in DEPARTMENTS:
             raise HTTPException(400, f"Unknown department {decision.department}")
-        set_departments(conn, doc_id, decision.department, [], 1.0)
+        set_departments(conn, doc_id, [(decision.department, 1.0)])
     status = "APPROVED" if decision.approve else "NEEDS_REVIEW"
     conn.execute("UPDATE documents SET status = ? WHERE doc_id = ?", (status, doc_id))
     audit(conn, "REVIEW", f"status={status} department={decision.department}", doc_id,

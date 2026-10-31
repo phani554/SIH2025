@@ -4,12 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .db import init_db
-from .deps import get_llm
-from .routers import ask, documents, gmail, review
+from .api.deps import get_llm
+from .api.routers import ask, documents, review, runs
 
 init_db()
 
-app = FastAPI(title="MetroMind: KMRL Document Intelligence", version="2.0")
+app = FastAPI(title="MetroMind: KMRL Document Intelligence", version="3.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_origin],
@@ -29,10 +29,12 @@ async def security_headers(request, call_next):
 app.include_router(documents.router)
 app.include_router(ask.router)
 app.include_router(review.router)
-app.include_router(gmail.router)
+app.include_router(runs.router)
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "llm_provider": get_llm().name, "auth": settings.auth_enabled,
+    llm = get_llm()
+    return {"status": "ok", "llm_provider": llm.name, "model": getattr(llm, "model", ""),
+            "auth": settings.auth_enabled,
             "chunk_strategy": settings.chunk_strategy, "hyde_default": settings.use_hyde}

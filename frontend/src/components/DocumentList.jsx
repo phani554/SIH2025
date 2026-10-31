@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, DEPARTMENTS } from '../api';
 
-export default function DocumentList({ refreshKey }) {
+export default function DocumentList({ refreshKey, onShowRun }) {
   const [docs, setDocs] = useState([]);
   const [department, setDepartment] = useState('');
   const [selected, setSelected] = useState(null);
@@ -34,42 +34,59 @@ export default function DocumentList({ refreshKey }) {
           </tbody>
         </table>
       </section>
-      {selected && <DocumentDetail doc={selected} />}
+      {selected && <DocumentDetail doc={selected} onShowRun={onShowRun} />}
     </div>
   );
 }
 
-function DocumentDetail({ doc }) {
-  const a = doc.analysis;
+function DocumentDetail({ doc, onShowRun }) {
+  const l1 = doc.level1;
+  const l2 = doc.level2;
   return (
     <section className="card detail">
-      <h2>{doc.file_name}</h2>
+      <div className="row">
+        <h2>{doc.file_name}</h2>
+        {doc.runs.length > 0 && <button onClick={() => onShowRun(doc.runs[doc.runs.length - 1].run_id)}>Show me how</button>}
+      </div>
       <p className="muted">
-        {doc.doc_type} · {doc.departments.map((d) => d.name).join(', ')} · confidence{' '}
-        {doc.confidence != null ? Math.round(doc.confidence * 100) + '%' : '-'} · {doc.chunks.length} chunks
+        {doc.doc_type || 'unknown type'} · {doc.departments.map((d) => d.name).join(', ') || 'no department'} ·
+        confidence {doc.confidence != null ? Math.round(doc.confidence * 100) + '%' : '-'} · {doc.chunks.length} chunks ·{' '}
+        <span className="badge">{doc.status}</span>
       </p>
+      {doc.review_reasons.length > 0 && (
+        <p className="badge amber">Held for review: {doc.review_reasons.join('; ')}</p>
+      )}
       <button className="link" onClick={() => api.openFile(doc.doc_id)}>Open original file</button>
-      {a ? (
+      {l1 && (
         <>
-          <h3>Summary</h3><p>{a.summary}</p>
-          <h3>Why this department</h3><p>{a.reasoning}</p>
-          {a.key_points.length > 0 && (<><h3>Key points</h3><ul>{a.key_points.map((k, i) => <li key={i}>{k}</li>)}</ul></>)}
-          {doc.action_items.length > 0 && (
-            <><h3>Action items</h3>
-              <ul>{doc.action_items.map((x, i) => (
-                <li key={i}>{x.action} <span className="muted">({x.owner || 'unassigned'}, {x.priority}{x.due ? `, due ${x.due}` : ''})</span></li>
-              ))}</ul></>
-          )}
-          {a.amounts.length > 0 && <p><strong>Amounts:</strong> {a.amounts.join(', ')}</p>}
-          {a.deadline && <p><strong>Deadline:</strong> {a.deadline}</p>}
+          <h3>Level 1 · preliminary analysis</h3>
+          <p>{l1.summary}</p>
+          <p className="muted small">Urgency {l1.urgency} · {l1.language} · {l1.reasoning}</p>
         </>
-      ) : <p className="muted">No analysis yet. This document is waiting for human review.</p>}
-      <h3>Chunks</h3>
+      )}
+      {l2 && (
+        <>
+          <h3>Level 2 · extracted facts</h3>
+          <table className="small">
+            <tbody>
+              {['dates', 'amounts', 'reference_ids', 'vendors'].map((k) => (
+                <tr key={k}><th>{k.replace('_', ' ')}</th>
+                  <td>{l2[k].length ? l2[k].map((e) => `${e.value} (${Math.round(e.confidence * 100)}%)`).join(', ') : '-'}</td></tr>
+              ))}
+              <tr><th>deadline</th><td>{l2.deadline || '-'}</td></tr>
+            </tbody>
+          </table>
+        </>
+      )}
+      {doc.action_items.length > 0 && (
+        <><h3>Action items</h3>
+          <ul>{doc.action_items.map((x, i) => (
+            <li key={i}>{x.action} <span className="muted">({x.priority}{x.due ? `, due ${x.due}` : ''})</span></li>
+          ))}</ul></>
+      )}
+      <h3>Chunks (as indexed, after redaction)</h3>
       {doc.chunks.map((c) => (
-        <p key={c.chunk_no} className="chunk">
-          <span className="muted">#{c.chunk_no} p.{c.page}</span>{' '}
-          {c.flagged ? <span className="badge red">possible prompt injection, excluded</span> : null} {c.preview}…
-        </p>
+        <p key={c.chunk_no} className="chunk"><span className="muted">#{c.chunk_no} p.{c.page}</span> {c.preview}…</p>
       ))}
     </section>
   );

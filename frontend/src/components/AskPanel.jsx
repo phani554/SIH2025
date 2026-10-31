@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { api, DEPARTMENTS } from '../api';
 
 // RAG chat: every answer shows the exact chunks it was built from.
-export default function AskPanel() {
+export default function AskPanel({ onShowRun }) {
   const [question, setQuestion] = useState('');
   const [department, setDepartment] = useState('');
   const [result, setResult] = useState(null);
@@ -44,7 +44,10 @@ export default function AskPanel() {
       {error && <p className="badge red">{error}</p>}
       {result && (
         <div className="answer">
-          <p className={result.grounded ? '' : 'muted'}>{result.answer}</p>
+          <div className="row">
+            <p className={result.grounded ? '' : 'muted'}>{result.answer}</p>
+            {result.run_id && <button onClick={() => onShowRun(result.run_id)}>Show me how</button>}
+          </div>
           {result.grounded && (
             <p className="muted">Faithfulness: {Math.round(result.faithfulness * 100)}% of sentences backed by their source</p>
           )}

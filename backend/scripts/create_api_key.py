@@ -7,7 +7,7 @@ import argparse
 
 from app.config import DEPARTMENTS
 from app.db import get_conn, init_db
-from app.security import ROLES, create_api_key
+from app.api.auth import ROLES, create_api_key
 
 
 def main():

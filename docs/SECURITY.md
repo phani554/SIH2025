@@ -1,25 +1,25 @@
-# Security
+# Security (basic, and every control is visible in the trace)
 
-All of it lives in `backend/app/security.py` (about 150 lines) plus a few lines in the routers.
-
-| Threat | Control | Where |
-|---|---|---|
-| Leaked LLM key | Key only in backend `.env`, sent as `x-goog-api-key` header (not in URLs or logs); browser never calls the LLM | `config.py`, `llm.py` |
-| Anyone can call the API | `X-API-Key` on every request; keys stored as SHA-256 hashes, shown once at creation | `current_user()`, `scripts/create_api_key.py` |
-| Over-broad access | Roles: **admin** (everything), **reviewer** (all departments, approve, audit), **viewer** (read/ask in own department only) | `require_role()`, `allowed_department()` |
-| Cross-department leaks via RAG | Department filter applied **before** retrieval; viewer's department comes from their key, not the request | `ask.py`, `retrieval.search()` |
-| Abuse / cost blow-up | 30 requests per minute per key (sliding window) | `check_rate_limit()` |
-| Malicious uploads | 15 MB limit, extension allowlist, **magic-byte check** (a `.pdf` must start with `%PDF`), filename sanitised | `validate_upload()`, `safe_file_name()` |
-| Personal data sent to the LLM | Aadhaar, PAN, phone and email masked (`[PHONE]`) **before** chunking, embedding and analysis | `redact_pii()`, `ingestion.py` |
-| Prompt injection inside documents | Pattern scan at ingest; flagged chunks excluded from retrieval and analysis, document sent to review; prompt marks documents as data | `looks_like_injection()`, `rag.py` |
-| OAuth CSRF on Gmail connect | Random `state` issued and checked on callback; Google `id_token` signature verified | `routers/gmail.py`, `services/gmail.py` |
-| Server details leaking | `saved_path` removed from API responses; security headers (`nosniff`, `DENY` framing, `no-referrer`); CORS limited to the frontend origin, methods and headers | `documents.py`, `main.py` |
-| No accountability | `audit_log` for INGEST, REDACT, INJECTION_FLAG, ANALYZE, VIEW, DOWNLOAD, QUERY, REVIEW, DELETE, with the key's name; rows survive document deletion | `db.audit()` |
+| Threat | Control | Code | Trace step |
+|---|---|---|---|
+| Leaked LLM key | Key only in `backend/.env`, sent in the `Authorization` header from the server; the browser never calls the LLM | `config.py`, `llm/providers.py` | (none: nothing to show) |
+| Anyone can call the API | `X-API-Key` on every request; only the SHA-256 of each key is stored; keys shown once | `api/auth.py`, `scripts/create_api_key.py` | `auth` (api) |
+| Over-broad access | Roles: admin (all), reviewer (all departments, approve, audit), viewer (own department only) | `require_role()` | `auth` |
+| Cross-department leaks through RAG | Viewer's department comes from their key, and the filter runs **before** retrieval | `allowed_department()`, `knowledge/retrieval.docs_in_department()` | `department_filter` (knowledge) |
+| Abuse / cost | 30 requests per minute per key, sliding window | `check_rate_limit()` | `auth` detail shows "n of 30 this minute" |
+| Malicious or junk uploads | 15 MB limit, empty-file check, extension allowlist, magic bytes (`.pdf` must start with `%PDF`), safe file names | `ingestion/validation.py` | `upload_validation` (rejected uploads are traced too) |
+| Duplicate processing | SHA-256 of the bytes, `UNIQUE` column; no LLM spend on a duplicate | `ingestion/validation.sha256_bytes`, `knowledge/store.find_by_sha256` | `sha256_dedupe` |
+| Personal data sent to the LLM or stored | Aadhaar, PAN, phone, email masked before chunking, embedding and analysis | `ingestion/redaction.py` | `pii_redaction` (counts + preview after masking) |
+| Prompt injection inside documents | Lines matching injection patterns are quarantined (removed before chunking), the document goes to review, and every prompt says documents are data | `ingestion/injection.py`, `llm/prompts.py` | `injection_scan` (the exact line and phrase), `review_gate` |
+| Bad LLM output | JSON mode + Pydantic schema; one retry with the error; still bad → review queue | `llm/structured.py`, `llm/schemas.py` | `level1_classification (attempt n)` with validation errors |
+| Ungrounded answers | Citation check per sentence; no supported citation → "Not found in the documents." | `llm/grounding.py` | `citation_check` (per-sentence table) |
+| No accountability | Audit log (INGEST, DUPLICATE, REDACT, INJECTION_FLAG, ANALYZE, QUERY, REVIEW, DELETE) + full run traces | `actions/audit.py`, `orchestrator/tracing.py` | `audit_query` |
+| Server details leaking | No server paths in responses; `nosniff`, `X-Frame-Options: DENY`, `no-referrer`; CORS limited to the frontend origin | `api/routers/documents.py`, `main.py` | (none) |
 
 ## Known gaps (say these before they ask)
 
-- Rate limiter and OAuth states are in memory: they reset on restart and don't work across several servers (use Redis).
-- Gmail refresh tokens are stored unencrypted in SQLite (encrypt with Fernet or a KMS).
-- Regex PII and injection detection catch common patterns, not everything. It's defence in depth, not a guarantee.
-- API keys suit a demo or service-to-service use. Staff would log in with SSO and get short-lived JWTs.
-- The old Gemini key is still in this repo's git history. It has been revoked; rewriting history wouldn't un-leak it.
+- Rate limiter is in memory: it resets on restart and doesn't work across several servers (use Redis).
+- Regex PII and injection detection catch common patterns, not everything. It's one layer of several.
+- API keys suit a demo. Staff would log in with SSO and short-lived JWTs.
+- Traces store the (already redacted) prompts. In production they'd have a retention period.
+- The old hackathon Gemini key is still in this repo's git history. It must be revoked; rewriting history won't un-leak it.

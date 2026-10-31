@@ -2,79 +2,92 @@
 
 *Smart India Hackathon 2025 · Problem ID 25080 · Kochi Metro Rail Limited*
 
-KMRL receives a flood of emails, scanned circulars, invoices and tenders every day, in English and Malayalam.
-MetroMind ingests them, routes each one to the right department with a summary and action items,
-and lets staff ask questions that are answered **only from the documents, with citations**.
+KMRL receives invoices, safety circulars, tenders and notices every day, in English and Malayalam.
+MetroMind takes an uploaded document, routes it to the right department (Level 1), pulls out the
+dates, amounts, ids, vendors and actions (Level 2), holds anything risky for a human, and answers
+staff questions **only from the documents, with citations**. Every step of every run is traced and
+can be replayed in the UI with **Show me how**.
 
-> v2.0 is a refactor of our hackathon prototype. The hackathon demo did classification in the browser;
-> v2 moves all AI to a FastAPI backend and adds the retrieval (RAG) layer we had designed.
+> v3 is a refactor of our hackathon prototype. The hackathon demo classified documents in the browser.
+> v3 moves all AI to a layered FastAPI backend and adds the two-level analysis, RAG, tracing and evals.
 
-## What it does
+## Architecture: separate layers, one orchestrator
+
+```
+ Ingestion sources                     FastAPI  (api/)
+ ┌──────────────────────────────┐      auth: hashed API keys, roles, rate limit
+ │ Manual upload        BUILT   │──┐   schema-validated requests
+ │ Gmail                planned │  │          │
+ │ WhatsApp             planned │  │          ▼
+ │ SharePoint / Drive   planned │  └──▶ ORCHESTRATOR (orchestrator/)
+ │ (planned = not built)        │      runs the steps in order, owns the run plan
+ └──────────────────────────────┘      (max steps, max LLM calls), writes the trace
+                                          │ calls one layer per step; layers never call each other
+        ┌──────────────────┬──────────────┼───────────────────┬──────────────────┐
+        ▼                  ▼              ▼                   ▼                  ▼
+   INGESTION          KNOWLEDGE          LLM               ACTIONS            TRACE
+   validate upload    sha256 dedupe      OpenAI gpt-4o-mini review gate        runs + run_steps
+   extract text       documents/chunks   (or offline rules) action items       → "Show me how"
+   redact PII         FTS5 (BM25)        prompts            audit log
+   quarantine         vectors (cosine)   L1 / L2 schemas
+     injections       RRF fusion         validate + 1 retry
+   chunk              dept filter        HyDE, answers,
+                                         citation check
+```
+
+Only **manual upload** exists today. Gmail, WhatsApp and SharePoint/Drive are shown in the diagram as
+planned sources that would feed the same orchestrator; there is no code for them.
+
+### Upload flow (16 planned steps, at most 18 with retries, at most 4 LLM calls)
+
+| Layer | Steps |
+|---|---|
+| api | auth |
+| orchestrator | plan_run (the bounded plan shown as "Preliminary analysis") |
+| ingestion | upload_validation, extract_text, pii_redaction, injection_scan, chunking |
+| knowledge | sha256_dedupe, save_original, index_chunks, save_results |
+| llm | embed_chunks, level1_classification, level2_extraction (each retried once if invalid) |
+| actions | review_gate, create_action_items |
+
+### Question flow
+
+api auth → orchestrator plan → knowledge department filter → BM25 → llm HyDE → embed → knowledge cosine
+→ RRF → llm answer → citation check → actions audit.
+
+## What each feature is
 
 | Feature | How |
 |---|---|
-| Ingest from upload or Gmail | FastAPI endpoint + Gmail API (OAuth2 with `state`, verified id_token) |
-| No duplicate processing | SHA-256 of the file bytes, enforced by a `UNIQUE` column |
-| Text extraction | pypdf for digital PDFs; Tesseract OCR (eng+hin+mal) for images |
-| Privacy | Aadhaar / PAN / phone / email masked before anything reaches the LLM or the index |
-| Classify, summarise, extract actions | **One** LLM call in JSON mode, validated by Pydantic, one retry, review fallback |
-| Chunking | Three strategies: `fixed`, `recursive` (default), `sentence` window |
-| Retrieval | **Hybrid**: BM25 (SQLite FTS5) + vector cosine, merged with Reciprocal Rank Fusion |
-| HyDE | Embed a hypothetical answer passage for the vector search (toggle per question) |
-| Grounded answers | `[n]` citations, exact refusal "Not found in the documents.", **citation check** with a faithfulness score |
-| Security | Hashed API keys with admin / reviewer / viewer roles, department filter before retrieval, rate limit, magic-byte upload checks, prompt-injection quarantine, audit log |
-| Human-in-the-loop | Confidence < 0.6, Critical urgency or injection flag → review queue |
-| Evals | 23-question dataset; hit@k, MRR, answer accuracy, refusal, faithfulness, latency across chunkers and retrieval modes |
-| Works offline | `LLM_PROVIDER=offline`: keyword classifier, hashed embeddings, extractive answers |
-
-Deeper notes: [docs/RAG_DESIGN.md](docs/RAG_DESIGN.md) · [docs/SECURITY.md](docs/SECURITY.md) · [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md)
-
-## Architecture
-
-```
-React (Vite) --HTTP + X-API-Key--> FastAPI
-                        |-- /documents  upload -> validate -> ingestion pipeline
-                        |      sha256 dedupe -> extract -> redact PII -> injection scan -> chunk -> embed
-                        |      -> LLM analysis (JSON) -> Pydantic validation -> departments, actions
-                        |-- /ask        [HyDE] -> hybrid retrieval (BM25 + vector, RRF) -> grounded answer
-                        |               -> citation check -> faithfulness score
-                        |-- /documents/{id}/review   human approval / correction
-                        |-- /audit      audit trail
-                        |-- /gmail      OAuth connect + sync attachments into the same pipeline
-                     SQLite: documents, chunks (+FTS5), departments, document_departments,
-                             action_items, audit_log, api_keys, gmail_accounts
-                     LLM: Gemini 2.5 Flash + gemini-embedding-001 (server-side key only)
-```
-
-Production path: SQLite -> Postgres with pgvector (HNSW index), a job queue for ingestion, SSO + JWT.
+| Level 1 (preliminary analysis) | Department(s) with confidence, doc type, urgency, language, L1 summary. One JSON-mode call, Pydantic-validated, one retry |
+| Level 2 (KPI extraction) | Dates, amounts, reference ids, vendors, action items, each with a confidence. Input: the L1 result + the chunks |
+| Review gate | Confidence < 0.6, Critical urgency, prompt injection, a failed LLM level, no readable text, or embeddings down → NEEDS_REVIEW |
+| Dedupe | SHA-256 of the bytes, enforced by a `UNIQUE` column |
+| Privacy | Aadhaar / PAN / phone / email masked before the LLM or the index sees the text |
+| Prompt injection | Matching lines are quarantined (never indexed, never sent to the LLM) and the document goes to review |
+| Retrieval | BM25 (SQLite FTS5) + vector cosine, fused with Reciprocal Rank Fusion (k = 60); optional HyDE |
+| Grounded answers | `[n]` citations, exact refusal "Not found in the documents.", sentence-level citation check |
+| Access control | Hashed API keys; admin / reviewer / viewer; viewers pinned to their department **before** retrieval |
+| Tracing | Every step stored with layer, timing, input/output, prompt, raw reply, validation, tokens, SQL, scores |
+| Evals | L1 accuracy, gate accuracy, L2 precision/recall, hit@k, MRR, answer accuracy, refusal, PII leaks, faithfulness |
+| Offline mode | `LLM_PROVIDER=offline`: regex/keyword rules with the same interface, for tests and no-Wi-Fi demos |
 
 ## Project layout
 
 ```
-backend/
-  app/
-    main.py              FastAPI app, CORS, security headers, routers
-    config.py            all settings from environment variables
-    db.py                schema + connection helpers + audit()
-    schemas.py           Pydantic models (LLM contract + API)
-    security.py          API keys, roles, rate limit, upload checks, PII redaction, injection scan
-    services/
-      extraction.py      file -> pages of text
-      chunking.py        fixed / recursive / sentence-window chunkers
-      llm.py             GeminiProvider / OfflineProvider
-      analysis.py        one structured LLM call + validation + retry
-      ingestion.py       the full pipeline for one file
-      retrieval.py       BM25, vector, RRF, HyDE
-      rag.py             grounded answer + citation check
-      gmail.py           Gmail OAuth + attachment sync
-    routers/             documents, ask, review, gmail
-  evals/dataset.jsonl    eval questions; report_offline.md is the baseline
-  scripts/               seed_demo, create_api_key, run_evals
-  tests/                 22 pytest tests (core logic, security, end-to-end API)
-  sample_docs/           7 KMRL-style documents
-frontend/
-  src/api.js             the only place that talks to the backend
-  src/components/        UploadPanel, DocumentList, AskPanel, ReviewPanel
+backend/app/
+  main.py, config.py, db.py      app, settings from .env, SQLite schema
+  api/          auth.py (keys, roles, rate limit), models.py, routers/ (documents, ask, review, runs)
+  orchestrator/ ingest_flow.py, ask_flow.py, tracing.py
+  ingestion/    validation.py, extraction.py, redaction.py, injection.py, chunking.py
+  knowledge/    store.py (documents, chunks, vectors), retrieval.py (BM25, cosine, RRF, dept filter)
+  llm/          providers.py (OpenAI, Offline), prompts.py, schemas.py, structured.py (validate + retry),
+                grounding.py (context + citation check)
+  actions/      gate.py, tasks.py, audit.py
+backend/sample_docs/   the 3 demo documents (2 clean, 1 unclean)
+backend/evals/         labels.jsonl, dataset.jsonl, corpus/ (5 more labelled docs), latest report
+backend/tests/         pytest: core, API end to end, layer rule
+frontend/src/          api.js + Upload, Documents, Ask, Review & Audit, Evals, ShowMeHow (drawer)
+docs/                  DEMO_SCRIPT.md, WALKTHROUGH.md, RAG_DESIGN.md, SECURITY.md, TEST_REPORT.md
 ```
 
 ## Run it
@@ -82,26 +95,34 @@ frontend/
 ```bash
 # Backend
 cd backend
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env              # add GEMINI_API_KEY, or set LLM_PROVIDER=offline
-python -m scripts.seed_demo       # loads samples, prints an admin key and a Finance viewer key
-uvicorn app.main:app --reload     # API on http://localhost:8000, docs at /docs
+cp .env.example .env            # put your OPENAI_API_KEY in .env (or set LLM_PROVIDER=offline)
+python -m scripts.seed_demo     # prints an admin key and a Finance viewer key
+uvicorn app.main:app --reload   # http://localhost:8000  (Swagger at /docs)
 
-# Frontend (new terminal)
+# Frontend (second terminal)
 cd frontend
 npm install
-npm run dev                       # http://localhost:5173, paste the admin key top right
+npm run dev                     # http://localhost:5173, paste the admin key top right
 
 # Tests and evals
 cd backend
 python -m pytest -q
-python -m scripts.run_evals --answers
+python -m scripts.run_evals --answers     # writes evals/report_<provider>.md, shown in the Evals tab
 ```
 
-If you change `LLM_PROVIDER` or `CHUNK_STRATEGY` after seeding, delete `metromind.db` and `uploads/` and seed again:
-embeddings from different providers can't be compared, and old chunks keep the old strategy.
+Switching provider (offline ↔ openai) or chunking strategy after documents are loaded: delete
+`metromind.db` and `uploads/`, then seed again. Vectors from different embedding models can't be compared.
+
+## Honest limits
+
+- Demo scale: SQLite and a numpy vector scan. Production would be Postgres + pgvector and a job queue.
+- API keys, not SSO. Rate limiter is in memory.
+- Regex PII and injection checks catch common patterns, not everything.
+- The committed eval numbers are from the offline rules on a small set written alongside them;
+  re-run with your OpenAI key to get model numbers.
 
 ## Team
 
-Built for SIH 2025 by our team. v2 refactor by Venkat Phaneendra Nittala.
+Built for SIH 2025 by our team. v2/v3 refactor by Venkat Phaneendra Nittala.

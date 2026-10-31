@@ -1,37 +1,47 @@
-# MetroMind eval report
+# MetroMind eval report (offline: offline-rules-v1)
 
-Provider: **offline** · questions: 23 (20 answerable) · k = 5
+Generated 2026-10-31T19:04:11+00:00 - 8 documents - 25 questions (4 must be refused) - k = 5
+
+### Level 1 and gate
+
+| L1 accuracy | gate accuracy | L2 precision | L2 recall |
+|---|---|---|---|
+| 1.0 | 1.0 | 0.98 | 1.0 |
+
+### Level 2 by entity type
+
+| entity | precision | recall | extracted | gold |
+|---|---|---|---|---|
+| dates | 0.95 | 1.0 | 20 | 19 |
+| amounts | 1.0 | 1.0 | 9 | 9 |
+| reference_ids | 1.0 | 1.0 | 10 | 10 |
+| vendors | 1.0 | 1.0 | 3 | 3 |
+
+### Level 1 per document
+
+| document | gold | predicted | status |
+|---|---|---|---|
+| invoice_INV-2025-0917_alstom.txt | Finance | Finance | ANALYZED |
+| safety_circular_SC-14_platform_screen_doors.txt | Safety | Safety | ANALYZED |
+| unclean_vendor_letter_injection_pii.txt | Finance | Finance | NEEDS_REVIEW |
+| cmrs_inspection_letter_vyttila_extension.txt | Safety | Safety | ANALYZED |
+| contract_amendment_housekeeping_services.txt | Legal | Legal | ANALYZED |
+| hr_notice_training_malayalam_signage.txt | HR | HR | ANALYZED |
+| maintenance_report_muttom_depot_sept.txt | Maintenance | Maintenance | ANALYZED |
+| tender_notice_cctv_upgrade.txt | Procurement | Procurement | ANALYZED |
 
 ### Retrieval
 
-| chunking | chunks | retrieval | hit@1 | hit@5 | MRR |
-|---|---|---|---|---|---|
-| fixed | 7 | keyword | 1.00 | 1.00 | 1.00 |
-| fixed | 7 | vector | 0.70 | 1.00 | 0.79 |
-| fixed | 7 | hybrid | 0.80 | 1.00 | 0.90 |
-| fixed | 7 | hybrid+hyde | 0.80 | 1.00 | 0.90 |
-| recursive | 7 | keyword | 1.00 | 1.00 | 1.00 |
-| recursive | 7 | vector | 0.70 | 1.00 | 0.79 |
-| recursive | 7 | hybrid | 0.80 | 1.00 | 0.90 |
-| recursive | 7 | hybrid+hyde | 0.80 | 1.00 | 0.90 |
-| sentence | 21 | keyword | 1.00 | 1.00 | 1.00 |
-| sentence | 21 | vector | 0.60 | 0.80 | 0.68 |
-| sentence | 21 | hybrid | 0.75 | 1.00 | 0.83 |
-| sentence | 21 | hybrid+hyde | 0.75 | 1.00 | 0.83 |
+| retrieval | hit@1 | hit@5 | MRR |
+|---|---|---|---|
+| keyword | 1.0 | 1.0 | 1.0 |
+| vector | 0.67 | 0.95 | 0.76 |
+| hybrid | 0.81 | 1.0 | 0.89 |
+| hybrid+hyde | 0.81 | 1.0 | 0.89 |
 
 ### Answers
 
-| chunking | retrieval | accuracy | refusal | faithfulness | latency_s |
+| retrieval | answer_accuracy | refusal | pii_leaks | faithfulness | latency_s |
 |---|---|---|---|---|---|
-| fixed | keyword | 0.70 | 0.67 | 0.95 | 0.00 |
-| fixed | vector | 0.70 | 0.67 | 0.95 | 0.00 |
-| fixed | hybrid | 0.70 | 0.67 | 0.95 | 0.00 |
-| fixed | hybrid+hyde | 0.70 | 0.67 | 0.95 | 0.00 |
-| recursive | keyword | 0.65 | 0.67 | 0.80 | 0.00 |
-| recursive | vector | 0.65 | 0.67 | 0.80 | 0.00 |
-| recursive | hybrid | 0.65 | 0.67 | 0.80 | 0.00 |
-| recursive | hybrid+hyde | 0.65 | 0.67 | 0.80 | 0.00 |
-| sentence | keyword | 0.55 | 0.67 | 0.95 | 0.00 |
-| sentence | vector | 0.55 | 1.00 | 0.75 | 0.00 |
-| sentence | hybrid | 0.60 | 0.67 | 0.95 | 0.00 |
-| sentence | hybrid+hyde | 0.60 | 0.67 | 0.95 | 0.00 |
+| hybrid | 0.71 | 0.75 | 0 | 0.95 | 0.0 |
+| hybrid+hyde | 0.71 | 0.75 | 0 | 0.95 | 0.0 |

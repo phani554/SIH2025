@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react';
 import { api, DEPARTMENTS } from '../api';
 
 // Human-in-the-loop: low-confidence or critical documents wait here.
-export default function ReviewPanel({ refreshKey, onChange }) {
+export default function ReviewPanel({ refreshKey, onChange, onShowRun }) {
   const [queue, setQueue] = useState([]);
   const [audit, setAudit] = useState([]);
   const [choice, setChoice] = useState({});
+  const [runs, setRuns] = useState([]);
 
   useEffect(() => {
     api.listDocuments({ status: 'NEEDS_REVIEW' }).then(setQueue).catch(() => setQueue([]));
     api.audit().then(setAudit).catch(() => setAudit([]));
+    api.runs().then(setRuns).catch(() => setRuns([]));
   }, [refreshKey]);
 
   const approve = async (doc) => {
@@ -35,6 +37,19 @@ export default function ReviewPanel({ refreshKey, onChange }) {
         ))}
       </section>
       <section className="card">
+        <h2>Recent runs</h2>
+        <table>
+          <thead><tr><th>Run</th><th>Kind</th><th>Status</th><th>Summary</th><th></th></tr></thead>
+          <tbody>
+            {runs.map((r) => (
+              <tr key={r.run_id}>
+                <td>#{r.run_id}</td><td>{r.kind}</td><td>{r.status}</td>
+                <td className="small">{(r.summary || '').slice(0, 70)}</td>
+                <td><button className="link" onClick={() => onShowRun(r.run_id)}>Show me how</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <h2>Audit trail</h2>
         <table>
           <thead><tr><th>Time (UTC)</th><th>Actor</th><th>Action</th><th>Doc</th></tr></thead>

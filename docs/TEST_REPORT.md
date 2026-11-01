@@ -10,7 +10,7 @@ Two kinds of numbers, never mixed:
 Ingest pipeline: **19 planned steps, at most 21** (with retries), at most 4 chat-model calls + 1 Decisions API call,
 max 1 retry per level.
 
-## 1. Automated tests: `python -m pytest -q` → 55 passed, 0 failed
+## 1. Automated tests: `python -m pytest -q` → 62 passed, 0 failed
 
 | Area | File | Tests | Passed | Failed |
 |---|---|---|---|---|
@@ -18,7 +18,8 @@ max 1 retry per level.
 | API end to end: auth 401, clean invoice full trace, unclean letter blocked and redacted, duplicate, rejected uploads still traced (4), garbage text → review, provider down → review, ask trace scores, refusal, masked PII not retrievable, viewer limited to own department, review + audit, eval endpoint | `tests/test_api.py` | 16 | 16 | 0 |
 | Layer rule: ingestion, knowledge, llm, actions import no other layer | `tests/test_layers.py` | 4 | 4 | 0 |
 | Department routing and review: definitions, work-order trap (chunk says Finance, document is Maintenance), Decisions disagreement and low confidence → review, Decisions request body, gpt-6 uses `reasoning_effort`, cost in trace, **unsure → no department**, no chunk signals not called "agreement", **unclear memo waits for a human, reviewer decides, action items created only then**, **rejected document never searched** | `tests/test_routing.py` | 11 | 11 | 0 |
-| **Total** | | **55** | **55** | **0** |
+| Red-team fixes (1 Nov 2026): Decisions API down → review, held document invisible to its department until approved, original file admin/reviewer only, unsupported sentences removed, BM25 department filter inside the query, a reviewer's decision is final, an all-injection document doesn't crash | `tests/test_redteam_fixes.py` | 7 | 7 | 0 |
+| **Total** | | **62** | **62** | **0** |
 
 One warning, unrelated to MetroMind: a deprecation notice inside Starlette's test client.
 
@@ -77,7 +78,7 @@ Boundary documents: fire-extinguisher tender → Procurement (Decisions 1.00), e
 - **The pending-review change live, partly.** One live API check (1 Nov 2026, ~13:15 IST, gpt-6-luna,
   `evals/live_pending_review_check.md`): unclear memo → NEEDS_REVIEW with no department (Decisions API 0.52 sure,
   under 0.6), Operations viewer 403, approve without a department 400, reviewer picks Operations → APPROVED,
-  2 held action items created, viewer 200. Work order still ANALYZED as Maintenance (1.00). Live headless-Chrome click-through (1 Nov 2026, ~13:10 IST, gpt-6-luna, `scripts/ui_check.py`): **43/43 UI checks
+  2 held action items created, viewer 200. Work order still ANALYZED as Maintenance (1.00). Live headless-Chrome click-through (before the red-team fixes; 1 Nov 2026, ~13:10 IST, gpt-6-luna, `scripts/ui_check.py`): **43/43 UI checks
   passed**, including the review queue (reasons + Decisions %, Approve disabled until a department is picked,
   reviewer's decision in the audit). Reject was tested offline only.
 - `ui_check.py` re-run live: 43/43. `e2e_check.py` includes unclear-memo checks; the live API flow was checked separately (see above).

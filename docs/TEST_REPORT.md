@@ -83,3 +83,12 @@ Boundary documents: fire-extinguisher tender → Procurement (Decisions 1.00), e
   reviewer's decision in the audit). Reject was tested offline only.
 - `ui_check.py` re-run live: 43/43. `e2e_check.py` includes unclear-memo checks; the live API flow was checked separately (see above).
 - Your laptop's browser, OCR for images (needs Tesseract), Malayalam-only documents, concurrent users.
+
+## Live re-test after the red-team fixes (1 Nov 2026, ~14:15 IST, OpenAI gpt-6-luna + Decisions API, fresh database)
+
+| Check | Result |
+|---|---|
+| `scripts.e2e_check` (API end to end) | **34 / 34 passed** |
+| `scripts.interview_checks` | **9 / 9 passed** (`evals/interview_checks_openai.md`) |
+| `scripts.ui_check` (headless Chrome click-through, fresh database) | **43 / 43 passed**, no browser console errors |
+| `pytest` (offline) | **62 / 62 passed** |

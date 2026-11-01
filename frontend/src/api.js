@@ -43,7 +43,7 @@ export const api = {
   },
   ask: (question, department, useHyde, mode) =>
     request('/ask', json({ question, department: department || null, use_hyde: useHyde, mode })),
-  review: (id, department) => request(`/documents/${id}/review`, json({ department, approve: true })),
+  review: (id, department, approve = true) => request(`/documents/${id}/review`, json({ department, approve })),
   audit: () => request('/audit'),
   runs: () => request('/runs'),
   run: (id) => request(`/runs/${id}`),

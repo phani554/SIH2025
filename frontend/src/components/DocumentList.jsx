@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, DEPARTMENTS } from '../api';
 import Routing from './Routing';
+import { DepartmentCell, StatusBadge } from './Status';
 
 export default function DocumentList({ refreshKey, onShowRun }) {
   const [docs, setDocs] = useState([]);
@@ -35,8 +36,8 @@ export default function DocumentList({ refreshKey, onShowRun }) {
           <tbody>
             {docs.map((d) => (
               <tr key={d.doc_id} onClick={() => open(d.doc_id)} className="clickable">
-                <td>{d.doc_id}</td><td>{d.file_name}</td><td>{d.department || '-'}</td>
-                <td>{d.urgency || '-'}</td><td><span className="badge">{d.status}</span></td>
+                <td>{d.doc_id}</td><td>{d.file_name}</td><td><DepartmentCell doc={d} /></td>
+                <td>{d.urgency || '-'}</td><td><StatusBadge status={d.status} /></td>
               </tr>
             ))}
           </tbody>
@@ -71,11 +72,12 @@ function DocumentDetail({ doc, onShowRun }) {
         {doc.runs.length > 0 && <button onClick={() => onShowRun(doc.runs[doc.runs.length - 1].run_id)}>Show me how</button>}
       </div>
       <p className="muted">
-        {doc.doc_type || 'unknown type'} · {doc.departments.map((d) => d.name).join(', ') || 'no department'} ·
+        {doc.doc_type || 'unknown type'} · {doc.departments.length ? doc.departments.map((d) => d.name).join(', ')
+          : (doc.routing && doc.routing.pending_review ? 'department pending review' : 'no department')} ·
         confidence {doc.confidence != null ? Math.round(doc.confidence * 100) + '%' : '-'} · {doc.chunks.length} chunks ·{' '}
-        <span className="badge">{doc.status}</span>
+        <StatusBadge status={doc.status} />
       </p>
-      {doc.review_reasons.length > 0 && (
+      {doc.status === 'NEEDS_REVIEW' && doc.review_reasons.length > 0 && (
         <p className="badge amber">Held for review: {doc.review_reasons.join('; ')}</p>
       )}
       <button className="link" onClick={() => api.openFile(doc.doc_id)}>Open original file</button>
@@ -100,6 +102,9 @@ function DocumentDetail({ doc, onShowRun }) {
             </tbody>
           </table>
         </>
+      )}
+      {doc.action_items.length === 0 && l2 && l2.action_items.length > 0 && doc.routing && doc.routing.pending_review && (
+        <p className="muted small">{l2.action_items.length} action item(s) held until a reviewer picks the department.</p>
       )}
       {doc.action_items.length > 0 && (
         <><h3>Action items</h3>

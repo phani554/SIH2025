@@ -1,6 +1,6 @@
 # MetroMind eval report (offline: offline-rules-v1)
 
-Generated 2026-10-31T20:20:00+00:00 - 9 documents - 27 questions (4 must be refused) - k = 5
+Generated 2026-11-01T07:29:16+00:00 - 9 documents - 27 questions (4 must be refused) - k = 5
 
 ### Level 1 and gate
 

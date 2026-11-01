@@ -78,7 +78,7 @@ function Preliminary({ kind, plan, steps }) {
         <>
           <p>
             {l1.departments.map((d, i) => (
-              <span key={d.name} className={`badge ${i === 0 ? 'green' : ''}`}>
+              <span key={d.name} className={`badge ${i === 0 ? (plan.routing && plan.routing.pending_review ? 'amber' : 'green') : ''}`}>
                 {d.name} {Math.round(d.confidence * 100)}%
               </span>
             ))}{' '}

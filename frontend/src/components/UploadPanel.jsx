@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'lucide-react';
 import { api } from '../api';
+import { StatusBadge } from './Status';
 
 // Manual upload: the one input source. Every upload, accepted or rejected, has a trace.
 export default function UploadPanel({ onUploaded, onShowRun }) {
@@ -39,7 +40,7 @@ export default function UploadPanel({ onUploaded, onShowRun }) {
               <strong>{r.name}</strong>{' '}
               {r.error ? <span className="badge red">rejected: {r.error}</span>
                 : r.duplicate ? <span className="badge grey">duplicate of #{r.doc_id}</span>
-                : <span className={`badge ${r.status === 'NEEDS_REVIEW' ? 'amber' : 'green'}`}>{r.status}</span>}
+                : <StatusBadge status={r.status} />}
             </span>
             {r.run_id && <button className="link" onClick={() => onShowRun(r.run_id)}>Show me how</button>}
           </li>

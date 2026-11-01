@@ -1,7 +1,7 @@
 {
   "provider": "offline",
   "model": "offline-rules-v1",
-  "generated_at": "2026-10-31T20:20:00+00:00",
+  "generated_at": "2026-11-01T07:29:16+00:00",
   "documents": 9,
   "questions": 27,
   "refusal_questions": 4,

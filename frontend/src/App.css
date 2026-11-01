@@ -81,3 +81,9 @@ td, th, p, li, .badge, .detail-box, .step-box { overflow-wrap: anywhere; }
 .card, .detail, .drawer { min-width: 0; }
 .split > * { min-width: 0; }
 .step-detail table { table-layout: auto; width: 100%; }
+
+.review-item { display: flex; flex-direction: column; gap: 4px; }
+.review-item p { margin: 2px 0; }
+.review-actions { flex-wrap: wrap; }
+button.secondary { background: #fff; color: #a1271c; border: 1px solid #e3b5b0; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }

@@ -39,11 +39,19 @@ def list_documents(status: str | None = None, department: str | None = None,
         department = user.department
     rows = [dict(r) for r in conn.execute(
         """SELECT d.doc_id, d.file_name, d.source, d.doc_type, d.urgency, d.confidence,
-                  d.status, d.created_at,
+                  d.status, d.created_at, d.review_reasons, d.routing_json,
                   (SELECT dep.name FROM document_departments dd JOIN departments dep
                      ON dep.dept_id = dd.dept_id
                    WHERE dd.doc_id = d.doc_id AND dd.is_primary = 1) AS department
            FROM documents d ORDER BY d.created_at DESC, d.doc_id DESC""")]
+    for r in rows:     # small summaries for the list and the review queue
+        r["review_reasons"] = json.loads(r["review_reasons"] or "[]")
+        routing = json.loads(r.pop("routing_json") or "null") or {}
+        decisions = routing.get("decisions") or {}
+        r["routing"] = {"pending_review": bool(routing.get("pending_review")),
+                        "candidates": routing.get("candidates", []),
+                        "level1_department": routing.get("level1_department"),
+                        "top_probabilities": (decisions.get("probabilities") or [])[:3]} if routing else None
     if status:
         rows = [r for r in rows if r["status"] == status]
     if department:

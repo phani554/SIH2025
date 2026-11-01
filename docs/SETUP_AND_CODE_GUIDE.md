@@ -15,7 +15,7 @@ This guide covers three things: getting it running on your laptop, what the data
 | OpenAI API key | with a little credit | platform.openai.com |
 | Tesseract OCR | 5.x (reads text inside PDF images and scans) | `tesseract --version` |
 
-**Tesseract on Windows:** install it from the UB Mannheim build (github.com/UB-Mannheim/tesseract/wiki), tick "Add to PATH", or set `TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe` in `backend/.env`. Without it, images are skipped and shown as "skipped" in the trace, and a page that is only a scan goes to review. That means the clean diagram PDF would be held, so install it before the demo.
+**Tesseract on Windows:** install it from the UB Mannheim build (github.com/UB-Mannheim/tesseract/wiki), then set `TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe` in `backend/.env` (the current installer no longer adds itself to PATH). Without it, images are skipped and shown as "skipped" in the trace, and a page that is only a scan goes to review. That means the clean diagram PDF would be held, so install it before the demo.
 
 **No database server to install.** MetroMind uses **SQLite**, a single file (`backend/metromind.db`). It is created automatically the first time the backend starts (`init_db()` in `app/db.py` runs `CREATE TABLE IF NOT EXISTS`). Keyword search uses SQLite's built-in **FTS5**, and vectors are stored in the same file as bytes. You don't need Postgres, Docker, Redis or a vector database.
 

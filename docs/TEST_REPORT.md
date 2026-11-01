@@ -77,7 +77,8 @@ Boundary documents: fire-extinguisher tender → Procurement (Decisions 1.00), e
 - **The pending-review change live, partly.** One live API check (1 Nov 2026, ~13:15 IST, gpt-6-luna,
   `evals/live_pending_review_check.md`): unclear memo → NEEDS_REVIEW with no department (Decisions API 0.52 sure,
   under 0.6), Operations viewer 403, approve without a department 400, reviewer picks Operations → APPROVED,
-  2 held action items created, viewer 200. Work order still ANALYZED as Maintenance (1.00). The new review queue UI
-  and Reject were tested offline only.
-- `ui_check.py` and `e2e_check.py` now include unclear-memo checks but were not re-run in this pass.
+  2 held action items created, viewer 200. Work order still ANALYZED as Maintenance (1.00). Live headless-Chrome click-through (1 Nov 2026, ~13:10 IST, gpt-6-luna, `scripts/ui_check.py`): **43/43 UI checks
+  passed**, including the review queue (reasons + Decisions %, Approve disabled until a department is picked,
+  reviewer's decision in the audit). Reject was tested offline only.
+- `ui_check.py` re-run live: 43/43. `e2e_check.py` includes unclear-memo checks; the live API flow was checked separately (see above).
 - Your laptop's browser, OCR for images (needs Tesseract), Malayalam-only documents, concurrent users.

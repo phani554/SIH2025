@@ -92,3 +92,9 @@ Boundary documents: fire-extinguisher tender → Procurement (Decisions 1.00), e
 | `scripts.interview_checks` | **9 / 9 passed** (`evals/interview_checks_openai.md`) |
 | `scripts.ui_check` (headless Chrome click-through, fresh database) | **43 / 43 passed**, no browser console errors |
 | `pytest` (offline) | **62 / 62 passed** |
+
+## Diagram PDFs, image OCR and the Level 2 source check (1 Nov 2026, ~19:00 IST)
+- New: OCR of images inside PDFs (charts, diagrams, scanned pages), the unreadable-page review rule, whole-sentence injection quarantine, the `v_chunk_lineage` view, and the Level 2 source check (every extracted date, amount, ID or vendor must appear in the document text, otherwise it is dropped and listed in the trace).
+- Offline: **66 passed** (pytest). Offline evals are unchanged.
+- Live (gpt-6-luna + Decisions API, fresh DB): the clean report was ANALYZED, Maintenance, 3 of 3 images read. The unclean bid went to NEEDS_REVIEW with 3 injection lines quarantined (one from inside a diagram), Aadhaar/PAN/phone/email masked from a scanned page, and page 4 unreadable. See `docs/PDF_IMAGES_AND_CHUNKS.md`.
+- Live evals rerun with the source check (`backend/evals/report_openai.md`): L1 1.0, gate 1.0, L2 precision 0.84 → 0.87, recall 0.98; by type: dates 0.81 → 0.85, amounts 0.73 → 0.85, reference IDs 1.0 → 0.92 (one run-to-run change), vendors 1.0. Retrieval hybrid 1.0 / 1.0 / 1.0. Answers (hybrid): accuracy 1.0, refusal 1.0, PII leaks 0, faithfulness 0.98.

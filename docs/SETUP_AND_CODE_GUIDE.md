@@ -13,6 +13,9 @@ This guide covers three things: getting it running on your laptop, what the data
 | Node.js | 20 or newer (Vite 7 needs it) | `node --version` |
 | Git | any | `git --version` |
 | OpenAI API key | with a little credit | platform.openai.com |
+| Tesseract OCR | 5.x (reads text inside PDF images and scans) | `tesseract --version` |
+
+**Tesseract on Windows:** install it from the UB Mannheim build (github.com/UB-Mannheim/tesseract/wiki), tick "Add to PATH", or set `TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe` in `backend/.env`. Without it, images are skipped and shown as "skipped" in the trace, and a page that is only a scan goes to review. That means the clean diagram PDF would be held, so install it before the demo.
 
 **No database server to install.** MetroMind uses **SQLite**, a single file (`backend/metromind.db`). It is created automatically the first time the backend starts (`init_db()` in `app/db.py` runs `CREATE TABLE IF NOT EXISTS`). Keyword search uses SQLite's built-in **FTS5**, and vectors are stored in the same file as bytes. You don't need Postgres, Docker, Redis or a vector database.
 
@@ -88,6 +91,14 @@ For production, I'd swap SQLite for **Postgres + pgvector**, and the in-memory r
 | `audit_log` | Who did what, and when (upload, view, download, review, redact, injection flag) | Accountability |
 | `runs`, `run_steps` | One run per upload or question; one row per step with layer, timing, input, output, prompt, tokens | The "Show me how" drawer |
 | `api_keys` | `key_hash` (SHA-256), name, role, department, active | Authentication |
+| `v_chunk_lineage` (VIEW) | Each chunk joined to its document: page, file, sha256, status, departments, doc type, urgency, confidence, chars, `vector_dims`, `has_figure_text`, text, document summary and Level 2 entities | **Read-only window for humans.** Open it in DB Browser for SQLite to show chunk → page → document → analysis in one row |
+
+**Where the chunk's summary, metrics and IDs live:** a chunk row holds only *its* text, page and vector. The summary, urgency, confidence, departments and the extracted dates, amounts and IDs belong to the **document** (`documents.summary`, `l1_json`, `l2_json`, `document_departments`), because they are decided from the whole document. A chunk links to them through `doc_id`. The view does that join for you.
+
+```sql
+SELECT chunk_no, page, file_name, status, departments, vector_dims, has_figure_text,
+       substr(text, 1, 100) FROM v_chunk_lineage ORDER BY doc_id, chunk_no;
+```
 
 **Statuses:** `ANALYZED` (all checks passed) · `NEEDS_REVIEW` (held) · `APPROVED` / `REJECTED` (a reviewer decided; final) · `DUPLICATE` is reported, not stored twice.
 **Viewers only ever see** documents that are `ANALYZED` or `APPROVED` *and* whose primary department is theirs.

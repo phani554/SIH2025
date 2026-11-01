@@ -21,7 +21,7 @@ from ..actions.routing import decide as decide_department
 from ..actions.tasks import create_action_items
 from ..config import settings
 from ..ingestion.chunking import chunk_pages
-from ..ingestion.extraction import extract_pages
+from ..ingestion.extraction import extract_document
 from ..ingestion.injection import quarantine_injections
 from ..ingestion.redaction import redact_pages
 from ..ingestion.signals import chunk_signals
@@ -121,11 +121,19 @@ def _ingest(conn, llm, tracer: Tracer, file_name: str, data: bytes, strategy, up
     audit(conn, "INGEST", f"upload: {file_name}", doc_id, actor=tracer.actor)
 
     with tracer.step("extract_text", "ingestion") as s:
-        pages = extract_pages(file_name, data)
+        extracted = extract_document(file_name, data)
+        pages = extracted.pages
         text = "\n".join(p.text for p in pages)
         words = re.findall(r"[^\W\d_]{2,}", text)
-        s.output = f"{len(pages)} page(s), {len(text):,} chars, {len(words)} words"
-        s.detail = {"pages": len(pages), "note": "text preview is shown after PII redaction, not here"}
+        figures = extracted.figures
+        read = sum(1 for f in figures if f.get("status") == "read")
+        s.output = f"{len(pages)} page(s), {len(text):,} chars, {len(words)} words" + \
+            (f"; {len(figures)} image(s), {read} read by OCR" if figures else "")
+        s.detail = {"pages": len(pages), "images": [{k: v for k, v in f.items() if k != "preview"} for f in figures],
+                    "unreadable_pages": extracted.unreadable_pages,
+                    "note": "OCR text is appended to its page as [Figure N, p.P]; previews are shown after PII redaction"}
+    if extracted.unreadable_pages:
+        reasons.append(f"page(s) {extracted.unreadable_pages} are images we could not read")
     if len(words) < 5:
         reasons.append("no readable text (empty, scanned or garbage file)")
         for name in PLANNED_STEPS[6:-3]:

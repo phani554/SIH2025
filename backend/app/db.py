@@ -10,6 +10,8 @@ Tables
   audit_log             who did what, when (FKs use SET NULL so history survives deletes)
   runs, run_steps       the trace behind "Show me how": every step of every upload and question
   api_keys              hashed API keys with a role and (for viewers) a department
+  v_chunk_lineage       VIEW: every chunk with its source document, page, vector size and
+                        the document-level analysis (open it in DB Browser for SQLite)
 """
 import sqlite3
 from contextlib import contextmanager
@@ -56,6 +58,21 @@ END;
 CREATE TRIGGER IF NOT EXISTS chunks_ad AFTER DELETE ON chunks BEGIN
     INSERT INTO chunks_fts(chunks_fts, rowid, text) VALUES ('delete', old.chunk_id, old.text);
 END;
+
+-- Read-only view for humans: chunk -> page -> document -> analysis, in one row.
+CREATE VIEW IF NOT EXISTS v_chunk_lineage AS
+SELECT c.chunk_id, c.chunk_no, c.page,
+       d.doc_id, d.file_name, substr(d.sha256, 1, 12) AS sha256_12, d.status,
+       (SELECT group_concat(dp.name, ', ') FROM document_departments dd
+          JOIN departments dp ON dp.dept_id = dd.dept_id WHERE dd.doc_id = d.doc_id) AS departments,
+       d.doc_type, d.urgency, round(d.confidence, 2) AS confidence,
+       length(c.text) AS chars,
+       CASE WHEN c.embedding IS NULL THEN 0 ELSE length(c.embedding) / 4 END AS vector_dims,
+       instr(c.text, '[Figure ') > 0 AS has_figure_text,
+       c.text,
+       d.summary AS doc_summary,
+       d.l2_json AS doc_entities
+FROM chunks c JOIN documents d ON d.doc_id = c.doc_id;
 
 CREATE TABLE IF NOT EXISTS departments (
     dept_id INTEGER PRIMARY KEY,

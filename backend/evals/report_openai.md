@@ -1,20 +1,20 @@
 # MetroMind eval report (openai: gpt-6-luna)
 
-Generated 2026-10-31T20:29:34+00:00 - 9 documents - 27 questions (4 must be refused) - k = 5
+Generated 2026-11-01T13:34:57+00:00 - 9 documents - 27 questions (4 must be refused) - k = 5
 
 ### Level 1 and gate
 
 | L1 accuracy | gate accuracy | L2 precision | L2 recall |
 |---|---|---|---|
-| 1.0 | 1.0 | 0.84 | 0.98 |
+| 1.0 | 1.0 | 0.87 | 0.98 |
 
 ### Level 2 by entity type
 
 | entity | precision | recall | extracted | gold |
 |---|---|---|---|---|
-| dates | 0.81 | 1.0 | 27 | 22 |
-| amounts | 0.73 | 1.0 | 15 | 11 |
-| reference_ids | 1.0 | 0.92 | 11 | 12 |
+| dates | 0.85 | 1.0 | 26 | 22 |
+| amounts | 0.85 | 1.0 | 13 | 11 |
+| reference_ids | 0.92 | 0.92 | 12 | 12 |
 | vendors | 1.0 | 1.0 | 4 | 4 |
 
 ### Level 1 per document
@@ -44,5 +44,5 @@ Generated 2026-10-31T20:29:34+00:00 - 9 documents - 27 questions (4 must be refu
 
 | retrieval | answer_accuracy | refusal | pii_leaks | faithfulness | latency_s |
 |---|---|---|---|---|---|
-| hybrid | 0.96 | 1.0 | 0 | 0.93 | 1.38 |
-| hybrid+hyde | 1.0 | 1.0 | 0 | 0.98 | 3.14 |
+| hybrid | 1.0 | 1.0 | 0 | 0.98 | 1.42 |
+| hybrid+hyde | 0.91 | 1.0 | 0 | 0.89 | 3.46 |

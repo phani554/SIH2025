@@ -1,7 +1,7 @@
 {
   "provider": "offline",
   "model": "offline-rules-v1",
-  "generated_at": "2026-11-01T07:29:16+00:00",
+  "generated_at": "2026-11-01T13:28:48+00:00",
   "documents": 9,
   "questions": 27,
   "refusal_questions": 4,
@@ -160,35 +160,6 @@
           0.74,
           1.0,
           0.82
-        ]
-      ]
-    },
-    {
-      "title": "Answers",
-      "columns": [
-        "retrieval",
-        "answer_accuracy",
-        "refusal",
-        "pii_leaks",
-        "faithfulness",
-        "latency_s"
-      ],
-      "rows": [
-        [
-          "hybrid",
-          0.7,
-          0.75,
-          0,
-          0.96,
-          0.0
-        ],
-        [
-          "hybrid+hyde",
-          0.7,
-          0.75,
-          0,
-          0.96,
-          0.0
         ]
       ]
     }

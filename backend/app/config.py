@@ -26,6 +26,7 @@ class Settings:
     chunk_size_words: int = int(os.getenv("CHUNK_SIZE_WORDS", "200"))
     chunk_overlap_words: int = int(os.getenv("CHUNK_OVERLAP_WORDS", "40"))
     chunk_strategy: str = os.getenv("CHUNK_STRATEGY", "recursive")   # fixed | recursive | sentence
+    ocr_images: bool = os.getenv("OCR_IMAGES", "true").lower() == "true"   # OCR diagrams / scanned pages in PDFs
     use_hyde: bool = os.getenv("USE_HYDE", "true").lower() == "true"
     review_threshold: float = float(os.getenv("REVIEW_CONFIDENCE_THRESHOLD", "0.6"))
     frontend_origin: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")

@@ -14,6 +14,7 @@ Every attempt is a step in the trace (the orchestrator passes its tracer in):
 prompt, raw reply, validation result, tokens.
 """
 import json
+import re
 
 from pydantic import BaseModel, ValidationError
 
@@ -30,7 +31,7 @@ class LevelFailed(RuntimeError):
     pass
 
 
-def run_level(llm, tracer, step_name: str, build_prompt, schema: type[BaseModel]):
+def run_level(llm, tracer, step_name: str, build_prompt, schema: type[BaseModel], check=None):
     """One LLM call + validation, retried once. Each attempt is one traced step."""
     error = ""
     for attempt in range(MAX_RETRIES + 1):
@@ -58,6 +59,11 @@ def run_level(llm, tracer, step_name: str, build_prompt, schema: type[BaseModel]
                 continue
             s.output = "valid " + schema.__name__
             s.detail["validation"] = {"passed": True, "schema": schema.__name__}
+            if check:                                   # e.g. Level 2: every value must be in the source
+                result, report = check(result)
+                s.detail["source_check"] = report
+                if report["dropped"]:
+                    s.output += f"; {len(report['dropped'])} value(s) not in the document dropped"
             s.detail["validated"] = result.model_dump()
             return result
     raise LevelFailed(f"{step_name} failed: {error}")
@@ -77,7 +83,31 @@ def level2(llm, tracer, l1: Level1Result, chunks: list[str]) -> Level2Result:
     return run_level(llm, tracer, "level2_extraction",
                      lambda note: LEVEL2_PROMPT.format(retry_note=note, level1=l1.model_dump_json(),
                                                        chunks=numbered),
-                     Level2Result)
+                     Level2Result, check=lambda result: verify_in_source(result, "\n".join(chunks)))
+
+
+def _norm(text: str) -> str:
+    return re.sub(r"[\s,]+", "", text.lower())
+
+
+def verify_in_source(result: Level2Result, source: str) -> tuple[Level2Result, dict]:
+    """Anti-hallucination for extraction: a date, amount, id or vendor the model returns must
+    appear (ignoring spaces, commas and case) in the document text. Anything else is invented
+    or reworded, so it is dropped and listed in the trace. Action items are summaries, so they
+    are not string-checked."""
+    haystack = _norm(source)
+    dropped, kept_count = [], 0
+    for field in ("dates", "amounts", "reference_ids", "vendors"):
+        kept = []
+        for entity in getattr(result, field):
+            if _norm(entity.value) and _norm(entity.value) in haystack:
+                kept.append(entity)
+            else:
+                dropped.append({"field": field, "value": entity.value})
+        setattr(result, field, kept)
+        kept_count += len(kept)
+    return result, {"rule": "each extracted value must appear in the document text", "kept": kept_count,
+                    "dropped": dropped}
 
 
 def _short_error(exc: Exception) -> str:

@@ -29,11 +29,16 @@ def find_injection(text: str) -> str | None:
 def quarantine_injections(pages: list[Page]) -> tuple[list[Page], list[dict]]:
     clean, quarantined = [], []
     for page in pages:
-        kept = []
+        kept, carry = [], 0
         for line in page.text.splitlines():
             phrase = find_injection(line)
-            if phrase:
-                quarantined.append({"page": page.number, "line": line.strip()[:300], "matched": phrase})
+            if phrase or carry:
+                quarantined.append({"page": page.number, "line": line.strip()[:300],
+                                    "matched": phrase or "(rest of the flagged sentence)"})
+                # PDFs wrap a sentence over several lines: if the flagged sentence has not ended,
+                # quarantine the next line too (at most 2 more), so no half-instruction is indexed.
+                ended = line.rstrip().endswith((".", "!", "?"))
+                carry = 0 if ended else (2 if phrase else carry - 1)
             else:
                 kept.append(line)
         clean.append(Page(page.number, "\n".join(kept)))

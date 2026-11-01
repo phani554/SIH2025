@@ -55,9 +55,13 @@ def decide(signals: list[dict], level1, decision: dict | None, threshold: float 
         check = "Decisions API not used; Level 1 decides alone."
 
     pending = review_reason is not None
+    # Candidates for the reviewer: Level 1's pick, then the Decisions API's likely departments
+    # (probability >= 0.15, at most 3 in total), so there is always a real choice to make.
     candidates = [level1.primary.name]
-    if decision and decision["choice"] not in candidates:
-        candidates.append(decision["choice"])
+    if decision:
+        for p in [{"value": decision["choice"], "probability": 1.0}] + decision["probabilities"]:
+            if p["value"] not in candidates and p["probability"] >= 0.15 and len(candidates) < 3:
+                candidates.append(p["value"])
     if pending:
         explanation = (f"Not decided automatically: {review_reason}. A reviewer picks the department "
                        f"(candidates: {', '.join(candidates)}). Until then no department can see it.")

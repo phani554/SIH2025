@@ -16,6 +16,7 @@ INVOICE = "invoice_INV-2025-0917_alstom.txt"
 SAFETY = "safety_circular_SC-14_platform_screen_doors.txt"
 UNCLEAN = "unclean_vendor_letter_injection_pii.txt"
 WORK_ORDER = "work_order_WO-RS-2025-0412_bogie_overhaul.txt"
+UNCLEAR = "unclear_memo_kaloor_lost_found_cheque.txt"
 
 
 def main():
@@ -58,6 +59,19 @@ def main():
           routing.get("final_department") == "Maintenance" and not routing.get("agrees_with_chunks", True),
           routing.get("headline", ""))
     check("work order: Decisions API agrees (or offline)", wo["status"] == "ANALYZED", routing.get("decisions_check", ""))
+    um = up(UNCLEAR, (SAMPLES / UNCLEAR).read_bytes()).json()
+    ur = run(um["run_id"]).json()["plan"].get("routing") or {}
+    check("unclear memo: department NOT decided automatically -> NEEDS_REVIEW",
+          um["status"] == "NEEDS_REVIEW" and ur.get("pending_review") and ur.get("final_department") is None,
+          ur.get("review_reason") or ur.get("headline", ""))
+    check("unclear memo: no department can open it yet",
+          requests.get(f"{B}/documents/{um['doc_id']}", headers=F).status_code == 403)
+    check("unclear memo: approve without a department is refused",
+          requests.post(f"{B}/documents/{um['doc_id']}/review", headers=A, json={}).status_code == 400)
+    ok = requests.post(f"{B}/documents/{um['doc_id']}/review", headers=A, json={"department": "Finance"}).json()
+    check("unclear memo: reviewer picks Finance -> APPROVED, Finance can open it",
+          ok.get("status") == "APPROVED" and requests.get(f"{B}/documents/{um['doc_id']}", headers=F).status_code == 200,
+          f"{ok.get('action_items_created')} held action item(s) created")
     cost = inv["plan"].get("cost", {})
     check("trace shows tokens and cost estimate", "usd_estimate" in cost,
           f"{cost.get('input_tokens')} in / {cost.get('output_tokens')} out, ${cost.get('usd_estimate')}")

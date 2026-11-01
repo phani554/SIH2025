@@ -74,7 +74,10 @@ Boundary documents: fire-extinguisher tender → Procurement (Decisions 1.00), e
 
 ## 4. Not tested yet
 
-- **The pending-review change live.** The unclear memo, "no department until a reviewer decides", the new review
-  queue and Reject were tested offline only (section 1). The live run above predates them.
-- `ui_check.py` and `e2e_check.py` were not re-run in this pass.
+- **The pending-review change live, partly.** One live API check (1 Nov 2026, ~13:15 IST, gpt-6-luna,
+  `evals/live_pending_review_check.md`): unclear memo → NEEDS_REVIEW with no department (Decisions API 0.52 sure,
+  under 0.6), Operations viewer 403, approve without a department 400, reviewer picks Operations → APPROVED,
+  2 held action items created, viewer 200. Work order still ANALYZED as Maintenance (1.00). The new review queue UI
+  and Reject were tested offline only.
+- `ui_check.py` and `e2e_check.py` now include unclear-memo checks but were not re-run in this pass.
 - Your laptop's browser, OCR for images (needs Tesseract), Malayalam-only documents, concurrent users.

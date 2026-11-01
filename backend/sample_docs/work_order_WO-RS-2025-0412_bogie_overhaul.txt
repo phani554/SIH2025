@@ -1,0 +1,22 @@
+MAINTENANCE WORK ORDER
+Work Order No: WO/RS/2025/0412
+Date: 18 September 2025
+Issued by: Rolling Stock Maintenance, Muttom Depot
+To: Depot Shift Supervisor (Rolling Stock), Muttom Depot
+
+Subject: Scheduled bogie overhaul of Trainset TS-07 after 1,20,000 km
+
+1. Scope of work
+Trainset TS-07 has completed 1,20,000 km since its last bogie overhaul and is due for the scheduled heavy maintenance. The depot maintenance team shall lift all six cars, remove the bogies and carry out a full overhaul as per the maintenance manual. The work includes replacing the primary suspension springs, inspecting the secondary air springs for leaks, checking wheel profiles and re-profiling wheels that are below limit, and replacing worn brake pads. Every bogie frame shall be inspected for cracks using dye penetrant testing before it is refitted.
+
+2. Schedule and responsibility
+The trainset will be withdrawn from service on 22 September 2025 and must be returned to the depot pool by 29 September 2025. The Depot Shift Supervisor is responsible for allocating two maintenance crews per shift and for updating the preventive maintenance records at the end of each shift. Any defect found during the work shall be reported to the Section Engineer the same day, with photographs, so that a decision on further action can be taken without delay.
+
+3. Cost estimate and payment details (for information only)
+Estimated cost of spares for this job: Rs. 4,20,000 plus GST at 18%, which makes the total payable Rs. 4,95,600. The spares will be drawn from the existing purchase order PO/KMRL/RS/2025/112 with Alstom Transport India Ltd. The supplier's invoice will be raised against that purchase order after delivery, and payment will be released by the Finance Department within 30 days as per the agreed payment terms. GST input credit will be claimed on the invoice as usual. No separate budget approval is needed from this office, and no payment is requested by this work order. This section is included only so that the cost of the job is recorded against the annual budget head for spares, and so that Finance can match the invoice when it arrives.
+
+4. Completion
+On completion, the Depot Shift Supervisor shall sign the work order, attach the test reports and hand the trainset over to Operations for a test run before it re-enters passenger service.
+
+Section Engineer (Rolling Stock)
+Muttom Depot, Kochi Metro Rail Limited

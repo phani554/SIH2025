@@ -1,0 +1,14 @@
+TAX INVOICE
+Invoice No: INV-2025-0917
+Date: 12 September 2025
+From: Alstom Transport India Ltd, Bengaluru
+To: Kochi Metro Rail Limited, Finance Department, JLN Stadium Metro Station, Kaloor, Kochi
+
+Description: Supply of spare bogie suspension kits for Metropolis trainsets (Qty 24) under Purchase Order PO/KMRL/RS/2025/112.
+Amount: Rs. 18,40,000
+GST @18%: Rs. 3,31,200
+Total payable: Rs. 21,71,200
+
+Payment terms: 30 days from date of invoice. Payment due by 12 October 2025.
+Please remit to the account stated in the vendor master. Late payment attracts interest at 1.5% per month.
+Contact: accounts.india@alstom-example.com

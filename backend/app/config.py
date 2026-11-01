@@ -1,0 +1,58 @@
+"""All settings come from environment variables (.env in development).
+
+Keeping config in one place means no secret ever lives in code,
+which was the main security problem in the hackathon version
+(an LLM key sat in front-end JavaScript).
+"""
+import os
+from dataclasses import dataclass
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+@dataclass(frozen=True)
+class Settings:
+    llm_provider: str = os.getenv("LLM_PROVIDER", "openai")        # openai | offline
+    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
+    openai_model: str = os.getenv("OPENAI_MODEL", "gpt-6-luna")
+    openai_embed_model: str = os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small")
+    use_decisions_api: bool = os.getenv("USE_DECISIONS_API", "true").lower() == "true"
+    department_agreement_threshold: float = float(os.getenv("DEPARTMENT_AGREEMENT_THRESHOLD", "0.6"))
+
+    db_path: str = os.getenv("DB_PATH", "metromind.db")
+    upload_dir: str = os.getenv("UPLOAD_DIR", "uploads")
+    chunk_size_words: int = int(os.getenv("CHUNK_SIZE_WORDS", "200"))
+    chunk_overlap_words: int = int(os.getenv("CHUNK_OVERLAP_WORDS", "40"))
+    chunk_strategy: str = os.getenv("CHUNK_STRATEGY", "recursive")   # fixed | recursive | sentence
+    ocr_images: bool = os.getenv("OCR_IMAGES", "true").lower() == "true"   # OCR diagrams / scanned pages in PDFs
+    use_hyde: bool = os.getenv("USE_HYDE", "true").lower() == "true"
+    review_threshold: float = float(os.getenv("REVIEW_CONFIDENCE_THRESHOLD", "0.6"))
+    frontend_origin: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+
+    # Security
+    auth_enabled: bool = os.getenv("AUTH_ENABLED", "true").lower() == "true"
+    redact_pii: bool = os.getenv("REDACT_PII", "true").lower() == "true"
+    rate_limit_per_minute: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "120"))
+    max_upload_mb: int = int(os.getenv("MAX_UPLOAD_MB", "15"))
+
+
+    @property
+    def use_openai(self) -> bool:
+        return self.llm_provider == "openai" and bool(self.openai_api_key)
+
+
+settings = Settings()
+
+from .departments import DEPARTMENTS  # noqa: E402  (definitions live in departments.py)
+
+
+# USD per 1M tokens, from developers.openai.com model pages (checked 1 Nov 2026).
+# Used only to show an ESTIMATED cost per run in the trace. Edit if prices change.
+PRICES_PER_1M = {
+    "gpt-6-luna": {"input": 0.10, "output": 0.50},
+    "gpt-6-luna/decisions": {"input": 0.10, "output": 0.0},     # Decisions API: output is free
+    "gpt-4o-mini": {"input": 0.15, "output": 0.60},
+    "text-embedding-3-small": {"input": 0.02, "output": 0.0},
+}

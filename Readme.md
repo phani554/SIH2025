@@ -88,9 +88,11 @@ backend/app/
   llm/          providers.py (OpenAI, Offline), prompts.py, schemas.py, structured.py (validate + retry),
                 grounding.py (context + citation check)
   actions/      gate.py, tasks.py, audit.py
-backend/sample_docs/   the 3 demo documents (2 clean, 1 unclean)
+backend/sample_docs/   demo documents: 3 clean (invoice, safety circular, bogie work order),
+                       1 blocked (vendor letter with PII + prompt injection),
+                       1 unclear memo (department unsure -> waits for a reviewer)
 backend/evals/         labels.jsonl, dataset.jsonl, corpus/ (5 more labelled docs), latest report
-backend/tests/         pytest: core, API end to end, layer rule
+backend/tests/         pytest: core, API end to end, layer rule, department routing + review
 frontend/src/          api.js + Upload, Documents, Ask, Review & Audit, Evals, ShowMeHow (drawer)
 docs/                  DEMO_SCRIPT.md, WALKTHROUGH.md, RAG_DESIGN.md, SECURITY.md, TEST_REPORT.md
 ```

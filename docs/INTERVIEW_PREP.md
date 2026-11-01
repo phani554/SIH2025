@@ -52,7 +52,7 @@ and cost for any run. A document costs about $0.0005."
 - *Why not LangChain / LlamaIndex?* Every step here is 20-80 lines I can show. A framework would hide the prompt, the retry and the retrieval scores, and those are what I need to defend and debug. I'd adopt one when the team needs its integrations.
 - *Why layers?* `api → orchestrator → ingestion / knowledge / llm / actions`. The orchestrator is the only place that knows the order. Layers never import each other; `tests/test_layers.py` fails the build if they do. I can swap SQLite for Postgres inside `knowledge/` without touching anything else.
 - *Why is the plan fixed in advance?* So a run can't loop or burn money: 19 steps, at most 21 with retries, at most 4 chat calls + 1 Decisions call. It's shown as the run plan before the steps.
-- *What happens if OpenAI is down?* Embedding failure: the document is still stored and keyword search still works; it goes to review. Level 1/2 failure: retried once, then review. Decisions failure: Level 1 decides alone, and the step shows "failed". Nothing is lost.
+- *What happens if OpenAI is down?* Embedding failure: the document is still stored and keyword search still works; it goes to review. Level 1/2 failure: retried once, then review. Decisions failure: the second opinion is a safety check, so the document goes to a reviewer (pending department) and the step shows "failed". Nothing is lost.
 - *Why SQLite?* One file, FTS5 for BM25 built in, zero setup for a demo. For production: Postgres + pgvector, a job queue for uploads, object storage for files.
 
 **LLM choices**
@@ -69,11 +69,11 @@ and cost for any run. A document costs about $0.0005."
 - *Chunking?* Recursive: split on sections, then paragraphs, then sentences, 200 words with 40 words of overlap. Fixed and sentence chunking are one `.env` switch.
 - *Why hybrid search?* BM25 nails exact tokens like "INV-2025-0917"; vectors catch paraphrases. Reciprocal Rank Fusion (k = 60) merges the two lists by rank, so I don't have to normalise different score scales.
 - *What is HyDE?* The model writes a fake answer passage; I embed question + passage. It helps vague questions; it costs one extra call (latency 1.4 s → 3.1 s here). It's on by default and one `.env` switch (`USE_HYDE`).
-- *How do you know an answer is grounded?* Every sentence must cite `[n]`; `citation_check` measures word overlap between each sentence and the chunk it cites. Below the threshold, it's flagged "not verified". If nothing relevant is retrieved, the exact answer is "Not found in the documents."
+- *How do you know an answer is grounded?* Every sentence must cite `[n]`; `citation_check` measures word overlap between each sentence and the chunk it cites. Unsupported sentences are removed; if fewer than half are supported, we refuse. If nothing relevant is retrieved, the exact answer is "Not found in the documents."
 
 **Security**
 
-- *PII?* Aadhaar, PAN, phone, email are masked with regexes **before** chunking, indexing, the LLM and the trace. The original file is kept for authorised download only.
+- *PII?* Aadhaar, PAN, phone, email are masked with regexes **before** chunking, indexing, the LLM and the trace. The original file is unmasked, so only admins and reviewers can download it; viewers only ever see masked chunks.
 - *Prompt injection?* Lines like "ignore all previous instructions" are quarantined at ingestion: never indexed, never sent to the model, and the document goes to review. Questions are also answered only from retrieved chunks with a fixed refusal.
 - *Is regex enough?* No. It's a first line. Next: a classifier (the Decisions API's predicate question fits), and treating every document as untrusted data in the prompt, which I already do.
 - *Access control?* Hashed API keys, roles admin/reviewer/viewer. A viewer is pinned to their department **before** retrieval, so other departments' chunks are never even scored. Wrong department → 403.

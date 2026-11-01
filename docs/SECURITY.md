@@ -12,7 +12,7 @@
 | Personal data sent to the LLM or stored | Aadhaar, PAN, phone, email masked before chunking, embedding and analysis | `ingestion/redaction.py` | `pii_redaction` (counts + preview after masking) |
 | Prompt injection inside documents | Lines matching injection patterns are quarantined (removed before chunking), the document goes to review, and every prompt says documents are data | `ingestion/injection.py`, `llm/prompts.py` | `injection_scan` (the exact line and phrase), `review_gate` |
 | Bad LLM output | JSON mode + Pydantic schema; one retry with the error; still bad → review queue | `llm/structured.py`, `llm/schemas.py` | `level1_classification (attempt n)` with validation errors |
-| Ungrounded answers | Citation check per sentence; no supported citation → "Not found in the documents." | `llm/grounding.py` | `citation_check` (per-sentence table) |
+| Ungrounded answers | Citation check per sentence; unsupported sentences are removed, and if fewer than half are supported → "Not found in the documents." | `llm/grounding.py` | `citation_check` (per-sentence table) |
 | No accountability | Audit log (INGEST, DUPLICATE, REDACT, INJECTION_FLAG, ANALYZE, QUERY, REVIEW, DELETE) + full run traces | `actions/audit.py`, `orchestrator/tracing.py` | `audit_query` |
 | Server details leaking | No server paths in responses; `nosniff`, `X-Frame-Options: DENY`, `no-referrer`; CORS limited to the frontend origin | `api/routers/documents.py`, `main.py` | (none) |
 

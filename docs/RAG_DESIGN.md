@@ -53,7 +53,7 @@ Cost: one extra LLM call per question. Turn it off for latency-sensitive use.
 - **Citation check (no extra LLM call):** split the answer into sentences; a sentence is *supported* when at
   least 50% of its content words appear in the chunk(s) it cites. `faithfulness = supported / all sentences`.
   Each citation in the response carries `supported: true/false`; the UI shows "verified" or "weak support".
-- No valid citation → we return the refusal instead of an ungrounded answer.
+- Unsupported sentences are removed from the answer; if none are supported, or fewer than half (`MIN_FAITHFULNESS = 0.5` in `orchestrator/ask_flow.py`), we return the refusal instead.
 
 ## 5. Evals (`scripts/run_evals.py`)
 

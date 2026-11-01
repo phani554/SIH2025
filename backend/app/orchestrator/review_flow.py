@@ -26,6 +26,10 @@ def apply_review(conn, doc_id: int, department: str | None, approve: bool, actor
                        (doc_id,)).fetchone()
     if not row:
         raise LookupError("Document not found")
+    # A reviewer can decide on anything the machine produced (NEEDS_REVIEW, or overrule ANALYZED),
+    # but a human decision is final: APPROVED / REJECTED documents can't be reviewed again.
+    if row["status"] not in ("NEEDS_REVIEW", "ANALYZED"):
+        raise ReviewError(f"Already decided by a reviewer ({row['status']}); upload a new version to change it")
     routing = json.loads(row["routing_json"] or "null") or {}
     before = conn.execute(
         """SELECT dep.name FROM document_departments dd JOIN departments dep ON dep.dept_id = dd.dept_id

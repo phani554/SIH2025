@@ -19,17 +19,20 @@ RRF_K = 60
 
 FTS_SQL = """SELECT c.chunk_id, c.doc_id, bm25(chunks_fts) AS score FROM chunks_fts
 JOIN chunks c ON c.chunk_id = chunks_fts.rowid
-WHERE chunks_fts MATCH ? ORDER BY score LIMIT ?"""
+WHERE chunks_fts MATCH ? {doc_filter} ORDER BY score LIMIT ?"""
 
 
 def docs_in_department(conn, department: str) -> set[int]:
     """Documents this department owns (its PRIMARY department). Access follows the document's
     one routed department, so a secondary guess by Level 1 never widens who can read it.
-    Documents pending review or rejected have no department, so no viewer can retrieve them."""
+    Only ANALYZED or APPROVED documents count: anything held for review (injection, unsure
+    department, critical urgency...) or rejected is invisible to the department until a reviewer approves it."""
     rows = conn.execute(
         """SELECT dd.doc_id FROM document_departments dd
            JOIN departments d ON d.dept_id = dd.dept_id
-           WHERE d.name = ? AND dd.is_primary = 1""", (department,)).fetchall()
+           JOIN documents doc ON doc.doc_id = dd.doc_id
+           WHERE d.name = ? AND dd.is_primary = 1
+             AND doc.status IN ('ANALYZED', 'APPROVED')""", (department,)).fetchall()
     return {r["doc_id"] for r in rows}
 
 
@@ -53,9 +56,14 @@ def keyword_search(conn, question: str, doc_ids: set[int] | None, limit: int = C
     query = fts_query(question)
     if not query:
         return query, []
-    rows = conn.execute(FTS_SQL, (query, limit * 3)).fetchall()
-    hits = [(r["chunk_id"], round(r["score"], 3)) for r in rows if doc_ids is None or r["doc_id"] in doc_ids]
-    return query, hits[:limit]
+    if doc_ids is not None and not doc_ids:
+        return query, []
+    # The access filter runs INSIDE the query, before ranking and LIMIT, so another
+    # department's documents can neither leak in nor crowd this department's results out.
+    ids = sorted(doc_ids) if doc_ids is not None else []
+    doc_filter = f"AND c.doc_id IN ({','.join('?' * len(ids))})" if ids else ""
+    rows = conn.execute(FTS_SQL.format(doc_filter=doc_filter), (query, *ids, limit)).fetchall()
+    return query, [(r["chunk_id"], round(r["score"], 3)) for r in rows]
 
 
 def vector_search(conn, query_vec: np.ndarray, doc_ids: set[int] | None, limit: int = CANDIDATES):

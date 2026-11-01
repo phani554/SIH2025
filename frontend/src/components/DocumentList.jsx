@@ -80,7 +80,10 @@ function DocumentDetail({ doc, onShowRun }) {
       {doc.status === 'NEEDS_REVIEW' && doc.review_reasons.length > 0 && (
         <p className="badge amber">Held for review: {doc.review_reasons.join('; ')}</p>
       )}
-      <button className="link" onClick={() => api.openFile(doc.doc_id)}>Open original file</button>
+      {/* The original is unmasked, so only admins and reviewers may open it (the server enforces this too). */}
+      <button className="link" onClick={() => api.openFile(doc.doc_id).catch((e) => alert(e.message))}>
+        Open original file (admins and reviewers)
+      </button>
       {doc.routing && (<><h3>Department routing</h3><Routing routing={doc.routing} /></>)}
       {l1 && (
         <>

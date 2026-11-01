@@ -41,7 +41,7 @@ def check_citations(answer: str, chunks: list[dict]) -> tuple[float, dict[int, b
         supported_count += ok
         for n in cited:
             per_citation[n] = per_citation.get(n, False) or ok
-        table.append({"sentence": sentence[:200], "cites": cited, "word_overlap": round(overlap, 2),
+        table.append({"sentence": sentence[:200], "text": sentence, "cites": cited, "word_overlap": round(overlap, 2),
                       "supported": ok})
     faithfulness = supported_count / len(sentences) if sentences else 0.0
     return faithfulness, per_citation, table

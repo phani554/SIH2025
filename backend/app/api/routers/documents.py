@@ -89,8 +89,9 @@ def get_document(doc_id: int, conn=Depends(get_db), user: User = Depends(current
 
 
 @router.get("/{doc_id}/file")
-def download_original(doc_id: int, conn=Depends(get_db), user: User = Depends(current_user)):
-    """Traceability: open the exact original file an answer came from."""
+def download_original(doc_id: int, conn=Depends(get_db), user: User = Depends(require_role("admin", "reviewer"))):
+    """Traceability: open the exact original file. The original is NOT masked (it may hold Aadhaar
+    numbers or injected text), so only admins and reviewers may download it; viewers see masked chunks."""
     row = conn.execute("SELECT file_name, saved_path FROM documents WHERE doc_id = ?", (doc_id,)).fetchone()
     if not row:
         raise HTTPException(404, "Document not found")

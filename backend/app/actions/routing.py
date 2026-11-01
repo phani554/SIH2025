@@ -17,7 +17,8 @@ Rules (all in this file, easy to change):
 """
 
 
-def decide(signals: list[dict], level1, decision: dict | None, threshold: float = 0.6) -> dict:
+def decide(signals: list[dict], level1, decision: dict | None, threshold: float = 0.6,
+           decisions_expected: bool = False) -> dict:
     final = level1.primary.name
     votes: dict[str, int] = {}
     for s in signals:
@@ -50,6 +51,11 @@ def decide(signals: list[dict], level1, decision: dict | None, threshold: float 
             review_reason = f"department unclear: Decisions API only {decision['confidence']:.2f} sure of {final}"
         check = (f"Decisions API agrees: {final} with probability {p_final:.2f}." if not review_reason
                  else review_reason + ".")
+    elif decisions_expected:
+        # The second opinion is a safety check: if it was switched on but failed, don't skip it silently.
+        p_final = None
+        review_reason = "department unchecked: Decisions API unavailable, a reviewer confirms"
+        check = review_reason + "."
     else:
         p_final = None
         check = "Decisions API not used; Level 1 decides alone."

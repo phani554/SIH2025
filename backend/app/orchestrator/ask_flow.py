@@ -16,6 +16,8 @@ from ..llm.grounding import NOT_FOUND, SUPPORT_THRESHOLD, build_context, check_c
 from ..llm.prompts import ANSWER_PROMPT, HYDE_PROMPT
 from .tracing import Tracer
 
+MIN_FAITHFULNESS = 0.5   # refuse if fewer than half of the answer's sentences are supported
+
 MODES = ("keyword", "vector", "hybrid")
 
 
@@ -46,15 +48,22 @@ def answer_question(conn, llm, question: str, department: str | None = None, top
 
     with tracer.step("citation_check", "llm") as s:
         faithfulness, supported, table = check_citations(answer, chunks)
-        grounded = NOT_FOUND not in answer and any(supported.values())
+        # Keep only the sentences the cited chunks support; refuse if fewer than half are supported.
+        kept = [r["text"] for r in table if r["supported"]]
+        grounded = NOT_FOUND not in answer and bool(kept) and faithfulness >= MIN_FAITHFULNESS
+        dropped = len(table) - len(kept)
+        if grounded:
+            answer = " ".join(kept)
         s.input = f"a sentence is supported if >= {SUPPORT_THRESHOLD:.0%} of its words are in the cited chunk"
         s.output = f"faithfulness {faithfulness:.2f}; " + ("grounded" if grounded else "NOT grounded -> refuse")
-        s.detail = {"sentences": table, "faithfulness": round(faithfulness, 2), "grounded": grounded}
+        s.output += f"; {dropped} unsupported sentence(s) removed" if grounded and dropped else ""
+        s.detail = {"sentences": table, "faithfulness": round(faithfulness, 2), "grounded": grounded,
+                    "min_faithfulness": MIN_FAITHFULNESS, "unsupported_removed": dropped if grounded else None}
 
     citations = [{"n": n, "chunk_id": chunks[n - 1]["chunk_id"], "doc_id": chunks[n - 1]["doc_id"],
                   "file_name": chunks[n - 1]["file_name"], "page": chunks[n - 1]["page"],
                   "snippet": chunks[n - 1]["text"][:300], "supported": ok}
-                 for n, ok in sorted(supported.items())]
+                 for n, ok in sorted(supported.items()) if ok]
     if not grounded:
         return _done(conn, tracer, question, NOT_FOUND, [], False, 0.0)
     return _done(conn, tracer, question, answer, citations, True, round(faithfulness, 2))

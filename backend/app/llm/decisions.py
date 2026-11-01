@@ -33,7 +33,7 @@ def department_decision(llm, tracer, text: str) -> dict | None:
                     "questions": questions}
         try:
             data = llm.decide(text[:MAX_CHARS], questions)
-        except Exception as exc:          # Decisions down: Level 1 still decides; we just lose the 2nd opinion
+        except Exception as exc:          # Decisions down: routing sends the document to a reviewer
             s.status, s.output = "failed", f"Decisions API unavailable: {str(exc)[:200]}"
             return None
         answer = data["answers"][0]

@@ -161,6 +161,13 @@ def _ingest(conn, llm, tracer: Tracer, file_name: str, data: bytes, strategy, up
         s.detail = {"chunks": [{"no": c.chunk_no, "page": c.page, "words": len(c.text.split()),
                                 "preview": c.text[:120]} for c in chunks]}
 
+    if not chunks:   # e.g. every line was quarantined: nothing safe left to index or analyse
+        reasons.append("no text left after quarantine")
+        start = PLANNED_STEPS.index("chunk_department_signals")
+        for name in PLANNED_STEPS[start:-3]:
+            tracer.skip(name, "orchestrator", "no text left after quarantine")
+        return _finish(conn, tracer, doc_id, None, None, reasons)
+
     with tracer.step("chunk_department_signals", "ingestion") as s:
         signals = chunk_signals(chunks)
         s.input = f"{len(chunks)} chunk(s), keyword lists from departments.py"
@@ -215,7 +222,8 @@ def _ingest(conn, llm, tracer: Tracer, file_name: str, data: bytes, strategy, up
     routing = None
     if lvl1:
         with tracer.step("department_routing", "actions") as s:
-            routing = decide_department(signals, lvl1, decision, settings.department_agreement_threshold)
+            routing = decide_department(signals, lvl1, decision, settings.department_agreement_threshold,
+                                        decisions_expected=settings.use_decisions_api)
             s.input = "chunk signals + Level 1 + Decisions API"
             s.output = routing["headline"]
             s.detail = routing

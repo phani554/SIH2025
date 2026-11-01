@@ -234,7 +234,10 @@ def _finish(conn, tracer: Tracer, doc_id: int, lvl1, lvl2, reasons: list[str], r
         s.output = f"{status}: " + ("; ".join(reasons) if reasons else "all checks passed")
         s.detail = {"rules": RULES, "reasons": reasons, "status": status}
 
-    if lvl2:
+    if lvl2 and routing and routing.get("pending_review"):
+        tracer.skip("create_action_items", "actions",
+                    "held: department pending review; created when a reviewer picks the department")
+    elif lvl2:
         with tracer.step("create_action_items", "actions") as s:
             n = create_action_items(conn, doc_id, lvl2)
             s.output = f"{n} action item(s) created"

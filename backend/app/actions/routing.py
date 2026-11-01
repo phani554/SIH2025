@@ -10,7 +10,9 @@ Rules (all in this file, easy to change):
     ("chunk #2 looks like Finance, but the document is Maintenance because ..."), because
     one paragraph about money does not make a repair order a Finance document.
   - If the Decisions API picks a different department, or is less than THRESHOLD sure,
-    the document goes to human review with that reason.
+    the system does NOT pick a department. final_department is None ("Pending review"):
+    no department can see it, no action items are created, and a reviewer chooses between
+    the candidates. An unsure machine should ask, not guess.
   - Access control follows the document's department, never one chunk's words.
 """
 
@@ -25,7 +27,9 @@ def decide(signals: list[dict], level1, decision: dict | None, threshold: float 
                       "document_says": final} for s in signals if s["signal"] and s["signal"] != final]
 
     # 1. chunks vs document
-    if disagreements:
+    if not votes:
+        explanation = "No chunk had department keywords, so Level 1's reading of the whole document decides."
+    elif disagreements:
         d = disagreements[0]
         explanation = (f"Chunk #{d['chunk_no']} looks like {d['chunk_says']}, but the document as a whole "
                        f"is {final}. {level1.reasoning}")
@@ -50,11 +54,30 @@ def decide(signals: list[dict], level1, decision: dict | None, threshold: float 
         p_final = None
         check = "Decisions API not used; Level 1 decides alone."
 
+    pending = review_reason is not None
+    candidates = [level1.primary.name]
+    if decision and decision["choice"] not in candidates:
+        candidates.append(decision["choice"])
+    if pending:
+        explanation = (f"Not decided automatically: {review_reason}. A reviewer picks the department "
+                       f"(candidates: {', '.join(candidates)}). Until then no department can see it.")
+        return {
+            "final_department": None, "pending_review": True, "candidates": candidates,
+            "level1_department": level1.primary.name,
+            "headline": f"Pending review: {' or '.join(candidates)}",
+            "explanation": explanation,
+            "reason": level1.reasoning + (f" Why not another department: {level1.why_not}" if level1.why_not else ""),
+            "decisions_check": check, "decisions_probability": p_final, "decisions": decision,
+            "chunk_votes": votes, "agrees_with_chunks": not disagreements, "disagreements": disagreements,
+            "review_reason": review_reason, "threshold": threshold,
+        }
+
     headline = (f"{final}" + (f" (chunk #{disagreements[0]['chunk_no']} looked like "
                               f"{disagreements[0]['chunk_says']})" if disagreements else "")
-                + ("; sent to review" if review_reason else ""))
+                )
     return {
-        "final_department": final,
+        "final_department": final, "pending_review": False, "candidates": [final],
+        "level1_department": level1.primary.name,
         "headline": headline,
         "explanation": explanation,
         "reason": level1.reasoning + (f" Why not another department: {level1.why_not}" if level1.why_not else ""),

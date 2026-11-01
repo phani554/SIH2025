@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS documents (
     summary      TEXT,
     urgency      TEXT,
     confidence   REAL,
-    status       TEXT NOT NULL DEFAULT 'NEW', -- NEW / ANALYZED / NEEDS_REVIEW / APPROVED
+    status       TEXT NOT NULL DEFAULT 'NEW', -- NEW / ANALYZED / NEEDS_REVIEW / APPROVED / REJECTED
     language     TEXT,                       -- e.g. "English", "English + Malayalam"
     l1_json      TEXT,                       -- Level 1: departments, urgency, summary (validated)
     l2_json      TEXT,                       -- Level 2: dates, amounts, regulation ids, vendors, actions

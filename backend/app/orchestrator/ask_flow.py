@@ -68,10 +68,12 @@ def search(conn, llm, question: str, department: str | None, top_k: int, mode: s
 
     # Filter BEFORE ranking, so other departments' chunks are never even scored.
     with tracer.step("department_filter", "knowledge") as s:
-        doc_ids = retrieval.docs_in_department(conn, department) if department else None
+        doc_ids = retrieval.searchable_docs(conn, department)
         s.input = f"department = {department or 'all'}"
-        s.output = f"{len(doc_ids)} document(s) searchable" if doc_ids is not None else "no filter: all documents"
-        s.detail = {"department": department, "doc_ids": sorted(doc_ids) if doc_ids is not None else "all"}
+        s.output = (f"{len(doc_ids)} document(s) searchable"
+                    + ("" if department else " (all departments, rejected documents excluded)"))
+        s.detail = {"department": department, "doc_ids": sorted(doc_ids),
+                    "rule": "primary department only; REJECTED documents are never searched"}
 
     rankings = []
     if mode in ("keyword", "hybrid"):

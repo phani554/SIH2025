@@ -1,9 +1,8 @@
 """Human-in-the-loop review queue and the audit trail."""
 from fastapi import APIRouter, Depends, HTTPException
 
-from ...actions.audit import audit
 from ...config import DEPARTMENTS
-from ...knowledge.store import set_departments
+from ...orchestrator.review_flow import ReviewError, apply_review
 from ..auth import User, current_user, require_role
 from ..deps import get_db
 from ..models import ReviewDecision
@@ -14,17 +13,14 @@ router = APIRouter(tags=["review"])
 @router.post("/documents/{doc_id}/review")
 def review(doc_id: int, decision: ReviewDecision, conn=Depends(get_db),
            user: User = Depends(require_role("admin", "reviewer"))):
-    if not conn.execute("SELECT 1 FROM documents WHERE doc_id = ?", (doc_id,)).fetchone():
-        raise HTTPException(404, "Document not found")
-    if decision.department:
-        if decision.department not in DEPARTMENTS:
-            raise HTTPException(400, f"Unknown department {decision.department}")
-        set_departments(conn, doc_id, [(decision.department, 1.0)])
-    status = "APPROVED" if decision.approve else "NEEDS_REVIEW"
-    conn.execute("UPDATE documents SET status = ? WHERE doc_id = ?", (status, doc_id))
-    audit(conn, "REVIEW", f"status={status} department={decision.department}", doc_id,
-          actor=user.name)
-    return {"doc_id": doc_id, "status": status}
+    if decision.department and decision.department not in DEPARTMENTS:
+        raise HTTPException(400, f"Unknown department {decision.department}")
+    try:
+        return apply_review(conn, doc_id, decision.department, decision.approve, user.name)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ReviewError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @router.get("/audit")

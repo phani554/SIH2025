@@ -53,7 +53,9 @@ def save_analysis(conn, doc_id: int, level1, level2, status: str, reasons: list[
          level1.urgency if level1 else None, confidence,
          status, json.dumps(reasons), level1.model_dump_json() if level1 else None,
          level2.model_dump_json() if level2 else None, json.dumps(routing) if routing else None, doc_id))
-    if level1:
+    if routing and routing.get("pending_review"):
+        set_departments(conn, doc_id, [])      # unsure: nobody owns it until a reviewer decides
+    elif level1:
         set_departments(conn, doc_id, [(d.name, d.confidence) for d in level1.departments])
 
 

@@ -23,10 +23,23 @@ WHERE chunks_fts MATCH ? ORDER BY score LIMIT ?"""
 
 
 def docs_in_department(conn, department: str) -> set[int]:
+    """Documents this department owns (its PRIMARY department). Access follows the document's
+    one routed department, so a secondary guess by Level 1 never widens who can read it.
+    Documents pending review or rejected have no department, so no viewer can retrieve them."""
     rows = conn.execute(
         """SELECT dd.doc_id FROM document_departments dd
-           JOIN departments d ON d.dept_id = dd.dept_id WHERE d.name = ?""", (department,)).fetchall()
+           JOIN departments d ON d.dept_id = dd.dept_id
+           WHERE d.name = ? AND dd.is_primary = 1""", (department,)).fetchall()
     return {r["doc_id"] for r in rows}
+
+
+def searchable_docs(conn, department: str | None) -> set[int]:
+    """What a question may search: one department's documents, or (no department) every
+    document except REJECTED ones. A rejected document stays stored for the audit trail
+    but never feeds an answer."""
+    if department:
+        return docs_in_department(conn, department)
+    return {r["doc_id"] for r in conn.execute("SELECT doc_id FROM documents WHERE status != 'REJECTED'")}
 
 
 def fts_query(question: str) -> str:
